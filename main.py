@@ -35,8 +35,11 @@ def click(e):
         yc2 = round(y/roundto)*roundto
         
         clickc = 0
-        c.create_rectangle(xc1,yc1,xc2,yc2)
-    
+
+        if mode == "rectangle":
+            c.create_rectangle(xc1,yc1,xc2,yc2)
+        
+
     
 win.bind('<Motion>',callback)
 win.bind("<Button-1>", click)

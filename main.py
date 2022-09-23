@@ -8,7 +8,7 @@ win.resizable(False, False)
 c = tkinter.Canvas(win, height=500, width=700, highlightthickness=0,borderwidth=0)
 c.pack()
 
-mode = "oval"
+mode = "triangle"
 x = 0
 y = 0
 xc1 = 0
@@ -44,7 +44,7 @@ def click(e):
         yc2 = round(y/roundto)*roundto
         
         if mode=="triangle" or mode=="ngon":
-            click +=1
+            
             escape
         else:
             clickc = 0
@@ -67,7 +67,14 @@ def click(e):
         if mode == "line":
             c.create_line(xc1,yc1,xc2,yc2, fill=linecolor)
             exportlines.append("c.create_line("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", fill='"+linecolor+"')")
-        print(exportlines)              
+        print(exportlines)
+    if clickc == 3:
+        if mode == "triangle":
+            clickc=0
+            xc3 = round(x/roundto)*roundto
+            yc3 = round(y/roundto)*roundto
+            c.create_polygon(xc1,yc1,xc2,yc2,xc3,yc3, fill=fillcolor, outline=linecolor)
+            exportlines.append("c.create_polygon("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+","+str(xc3)+","+str(yc3)+", fill='"+fillcolor+"',outline='"+linecolor+"')")
                           
     
 win.bind('<Motion>',callback)
@@ -88,6 +95,11 @@ def modeline():
     global mode
     
     mode = "line"
+    print(mode)
+def modetriangle():
+    global mode
+    
+    mode = "triangle"
     print(mode)
 
 
@@ -146,6 +158,7 @@ toolwindow.resizable(False, False)
 rectanglebutton = tkinter.Button(toolwindow, text="Rectangle", command=moderectangle).pack()
 ovalbutton = tkinter.Button(toolwindow, text="Oval", command=modeoval).pack()
 linebutton = tkinter.Button(toolwindow, text="Line (uses OUTLINE color not FILL COLOR", command=modeline).pack()
+linebutton = tkinter.Button(toolwindow, text="Triangle", command=modetriangle).pack()
 
 colpickbut = tkinter.Button(toolwindow, text="Fill Color", command=opencolorpick, bg=fillcolor)
 colpickbut.pack()

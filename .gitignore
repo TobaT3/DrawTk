@@ -1,3 +1,7 @@
 
 tkinter_drawing.py
 tkinter_drawing.png
+
+build/
+dist/
+main.spec

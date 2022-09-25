@@ -30,7 +30,7 @@ Click on the export to .py button. export to .py generates a python file like th
 
 Example tkinter_drawing.py file:
 
-    #Made in TkPaint by TobaT3
+    #Made in DrawTk by TobaT3
 
     import tkinter
     c = tkinter.Canvas(height=500, width=700)

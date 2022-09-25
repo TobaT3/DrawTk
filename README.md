@@ -8,7 +8,8 @@ Make pngs and .py files with drawings made in a visual editor
 
 # Usage
 ## Download
-1. Clone the repository (or just download main.py) somewhere on your computer.
+
+1. Either download the latest release .exe or .py file, or clone this repo
 2. Run the file!
 
 Make sure you have installed python 3.10, tkinter (should come installed with python) and pillow.
@@ -26,7 +27,7 @@ Select one of the tools from the toolbox. Then just click on the canvas, pretty 
 
 **Keep in mind that exporting will overwrite the previously generated file. If you dont want to lose a previously generated file, before you run another export operation move or rename the existing tkinter_drawing.py file (same goes for the .png files)**
 
-Click on the export to .py button. export to .py generates a python file like the one below in the directory where the main python file is located (named tkinter_drawing.py). Simply run it and you should see your image.
+Click on the export to .py button. export to .py generates a python file like the one below in the directory where the main python file or .exe file is located (named tkinter_drawing.py). Simply run it and you should see your image.
 
 Example tkinter_drawing.py file:
 
@@ -69,7 +70,7 @@ Example tkinter_drawing.py file:
 
 **Keep in mind that exporting will overwrite the previously generated file. If you dont want to lose a previously generated file, before you run another export operation move or rename the existing tkinter_drawing.png file (same goes for the .py files)**
 
-Click on the export to .png button. A file named tkinter_drawing.png should pop up in the directory where the main.py file is located. Open it in whatever program you want!
+Click on the export to .png button. A file named tkinter_drawing.png should pop up in the directory where the main.py or drawtk.exe file is located. Open it in whatever program you want!
 
 ## Thanks to:
 

@@ -1,4 +1,4 @@
-# TkPaint
+# DrawTk
 Make pngs and .py files with drawings made in a visual editor
 
 (I might have changed the repo name a bunch of times upon discovering how many repos were called TkPaint...)

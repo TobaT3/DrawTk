@@ -78,35 +78,38 @@ def click(e):
                 ids += 1
                 totids += 1
                 c.create_rectangle(xc1,yc1,xc2,yc2, fill="", outline=linecolor, width=linethicc)
-                exportlines.append("c.create_rectangle("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+",fill='', outline='"+linecolor+"')")
+                exportlines.append("c.create_rectangle("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", width="+str(linethicc)+",fill='', outline='"+linecolor+"')")
             elif isfilltransparent == False:
                 ids += 1
                 totids += 1
                 c.create_rectangle(xc1,yc1,xc2,yc2, fill=fillcolor, outline=linecolor, width=linethicc)
-                exportlines.append("c.create_rectangle("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+",fill='"+fillcolor+"', outline='"+linecolor+"')")
+                exportlines.append("c.create_rectangle("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", width="+str(linethicc)+",fill='"+fillcolor+"', outline='"+linecolor+"')")
         if mode == "oval":
             if isfilltransparent == True:
                 ids += 1
                 totids += 1
                 c.create_oval(xc1,yc1,xc2,yc2, fill="", outline=linecolor, width=linethicc)
-                exportlines.append("c.create_oval("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+",fill='', outline='"+linecolor+"')")
+                exportlines.append("c.create_oval("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", width="+str(linethicc)+",fill='', outline='"+linecolor+"')")
             elif isfilltransparent == False:
                 ids += 1
                 totids += 1
                 c.create_oval(xc1,yc1,xc2,yc2, fill=fillcolor, outline=linecolor, width=linethicc)
-                exportlines.append("c.create_oval("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+",fill='"+fillcolor+"', outline='"+linecolor+"')")
+                exportlines.append("c.create_oval("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", width="+str(linethicc)+",fill='"+fillcolor+"', outline='"+linecolor+"')")
         if mode == "line":
             ids += 1
             totids += 1
             c.create_line(xc1,yc1,xc2,yc2, fill=linecolor, width=linethicc)
-            exportlines.append("c.create_line("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", fill='"+linecolor+"')")
+            exportlines.append("c.create_line("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", width="+str(linethicc)+", fill='"+linecolor+"')")
         print(exportlines)
         if mode == "ngon": # I am very aware that this is quite the workaround but i cant figure out how to make create_polygon work with a possibly infinite amount of coordinates.
             ids += 1
             totids += 1
             getfirstpoint = False
             c.create_line(xc1,yc1,xc2,yc2, fill=linecolor, width=linethicc)
-            exportlines.append("c.create_line("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", fill='"+linecolor+"')")
+            exportlines.append("c.create_line("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", width="+str(linethicc)+", fill='"+linecolor+"')")
+
+            
+
     if clickc == 3:
         linethicc = thicc.get()
         if mode == "triangle":
@@ -118,10 +121,10 @@ def click(e):
 
             if isfilltransparent == True:
                 c.create_polygon(xc1,yc1,xc2,yc2,xc3,yc3, fill="", outline=linecolor, width=linethicc)
-                exportlines.append("c.create_polygon("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+","+str(xc3)+","+str(yc3)+", fill='',outline='"+linecolor+"')")
+                exportlines.append("c.create_polygon("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+","+str(xc3)+","+str(yc3)+", fill='',outline='"+linecolor+"', width="+str(linethicc)+")")
             elif isfilltransparent == False:
-                c.create_polygon(xc1,yc1,xc2,yc2,xc3,yc3, fill=fillcolor, outline=linecolor)
-                exportlines.append("c.create_polygon("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+","+str(xc3)+","+str(yc3)+", fill='"+fillcolor+"',outline='"+linecolor+"')")
+                c.create_polygon(xc1,yc1,xc2,yc2,xc3,yc3, fill=fillcolor, outline=linecolor, width=linethicc)
+                exportlines.append("c.create_polygon("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+","+str(xc3)+","+str(yc3)+", fill='"+fillcolor+"',outline='"+linecolor+"', width="+str(linethicc)+")")
     
 win.bind('<Motion>',callback)
 win.bind("<Button-1>", click)

@@ -212,7 +212,7 @@ def togglefilltransparent():
 def generate():
     print('generating')
     fp = open('tkinter_drawing.py', 'w')
-    fp.write('#Made in TkPaint by TobaT3\n')
+    fp.write('#Made in DrawTk by TobaT3\n')
     fp.write('\nimport tkinter')
     fp.write('\nc = tkinter.Canvas(height=500, width=700)')
     fp.write('\nc.pack()\n')

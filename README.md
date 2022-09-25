@@ -4,7 +4,7 @@ Make pngs and .py files with drawings made in a visual editor
 (I might have changed the repo name a bunch of times upon discovering how many repos were called TkPaint...)
 
 
-**If you have any ideas or experience any problems, please open an Issue**
+**If you have any ideas, problems or just a question, please open an Issue**
 
 # Usage
 ## Download

@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Have an idea on how to make TkPaint better? Use this template
+about: Have an idea on how to make DrawTk better? Use this template
 title: ''
 labels: enhancement
 assignees: ''

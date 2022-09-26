@@ -23,6 +23,7 @@ yc3 = 0
 clickc = 0
 roundto = 50
 ids = 0
+totids = 0
 linec = 0
 linethicc = 1
 getfirstpoint = True
@@ -42,6 +43,8 @@ def callback(e):
     x = e.x
     y = e.y
 
+    ids = totids
+
     roundto = snapp.get()
     if roundto == 0:
         roundto=1
@@ -50,15 +53,16 @@ def callback(e):
     #print("Pointer is currently at %d, %d" %(x,y))
 
 def click(e):
-    global xc1,xc2,yc1,yc2,xc3,yc3,clickc,roundto, exportlines, ids, getfirstpoint, clickcs, drawingngon, linethicc, linec
+    global xc1,xc2,yc1,yc2,xc3,yc3,clickc,roundto, exportlines, ids, getfirstpoint, clickcs, drawingngon, linethicc, linec, totids
     
+    
+    ids = totids
     clickc += 1
     print("Clicked")
 
     if clickc == 1:
         xc1 = round(x/roundto)*roundto
         yc1 = round(y/roundto)*roundto
-
     if clickc == 2:
         if mode == "ngon" and getfirstpoint == False:
             xc1 = xc2
@@ -80,33 +84,31 @@ def click(e):
             print(fillcolor, isfilltransparent)
             if isfilltransparent == True:
                 ids += 1
+                totids += 1
                 c.create_rectangle(xc1,yc1,xc2,yc2, fill="", outline=linecolor, width=linethicc)
                 exportlines.append("c.create_rectangle("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", width="+str(linethicc)+",fill='', outline='"+linecolor+"')")
             elif isfilltransparent == False:
                 ids += 1
+                totids += 1
                 c.create_rectangle(xc1,yc1,xc2,yc2, fill=fillcolor, outline=linecolor, width=linethicc)
                 exportlines.append("c.create_rectangle("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", width="+str(linethicc)+",fill='"+fillcolor+"', outline='"+linecolor+"')")
         if mode == "oval":
             if isfilltransparent == True:
                 ids += 1
+                totids += 1
                 c.create_oval(xc1,yc1,xc2,yc2, fill="", outline=linecolor, width=linethicc)
                 exportlines.append("c.create_oval("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", width="+str(linethicc)+",fill='', outline='"+linecolor+"')")
             elif isfilltransparent == False:
                 ids += 1
+                totids += 1
                 c.create_oval(xc1,yc1,xc2,yc2, fill=fillcolor, outline=linecolor, width=linethicc)
                 exportlines.append("c.create_oval("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", width="+str(linethicc)+",fill='"+fillcolor+"', outline='"+linecolor+"')")
         if mode == "line":
             ids += 1
+            totids += 1
             c.create_line(xc1,yc1,xc2,yc2, fill=linecolor, width=linethicc)
             exportlines.append("c.create_line("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", width="+str(linethicc)+", fill='"+linecolor+"')")
         print(exportlines)
-        getfirstpoint = False
-        if mode == "ngon":
-            ids += 1
-            linec += 1
-            getfirstpoint = False
-            c.create_line(xc1,yc1,xc2,yc2, width=linethicc, fill="gray")
-            #exportlines.append("c.create_line("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", width="+str(linethicc)+", fill='"+linecolor+"')")
 
             
 
@@ -114,6 +116,7 @@ def click(e):
         linethicc = thicc.get()
         if mode == "triangle":
             ids += 1
+            totids += 1
             clickc=0
             xc3 = round(x/roundto)*roundto
             yc3 = round(y/roundto)*roundto
@@ -134,20 +137,18 @@ def click(e):
 
 
 def drawngon():
-    global ids, clickcs, fillcolor, linecolor, linethicc, c, linec
+    global ids, clickcs, fillcolor, linecolor, linethicc, c, linec, totids
     
     print("drawngon")
-    print(linec-1)
-    for x in range(linec):
-        print(x)
-        c.delete(ids)
-        ids -= 1
 
     
     linethicc = thicc.get()
+    ids += 1
+    totids += 1
 
     if isfilltransparent == True:
-        c.create_polygon(clickcs, fill="", outline= linecolor, width=linethicc)
+        test = c.create_polygon(clickcs, fill="", outline= linecolor, width=linethicc)
+        print(test)
         exportlines.append("c.create_polygon("+str(clickcs)+", fill='', outline='"+linecolor+"', width="+str(linethicc)+")")
     elif isfilltransparent == False:
         c.create_polygon(clickcs, fill=fillcolor, outline= linecolor, width=linethicc)
@@ -156,13 +157,15 @@ def drawngon():
     print("still drawngon")
 
     del clickcs [:]
+
     linec = 0
+    
 
     print("CLEARED clickcs", clickcs)
-
+    
     print("end drawngon")
 
-    ids += 1
+    
         
 
 win.bind('<Motion>',callback)
@@ -288,7 +291,7 @@ def getter():
 #generate()
 
 def undo():
-    global ids
+    global ids, totids
     c.delete(ids)
 
     ids -= 1

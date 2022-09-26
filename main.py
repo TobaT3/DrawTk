@@ -1,6 +1,6 @@
 from glob import escape
 import tkinter
-from tkinter import HORIZONTAL, colorchooser, filedialog
+from tkinter import HORIZONTAL, colorchooser, filedialog, messagebox
 from PIL import ImageGrab
 import pathlib
 
@@ -264,8 +264,17 @@ def load():
     fp = filedialog.askopenfile(initialdir = pathlib.Path(__file__).parent.resolve(), title = "Open a DrawTk generated .py file", filetypes=[("Python file", ".py")], defaultextension=".py")
 
     i = 0
+    
     for x in fp:
-        i += 1 
+        i += 1
+
+        if i == 1:
+            if x != "#If you want to load this file make sure lines 1-6 are not modified": #The simplest check to make it so you dont load a bad python file
+                messagebox.showerror('Error loading file', "Make sure the file you're using was generated in drawtk\n(or was modified in a way that it works as a drawtk generated file)\n\n i know this sounds way too complicated just make sure you're not loading in a virus or a funny rickroll cmon")
+                break
+                
+
+
         if i > 6 and x != "tkinter.mainloop()":
             exec(x)
             totids += 1
@@ -281,7 +290,7 @@ def exportpy():
     fp.write('\nimport tkinter')
     fp.write('\nc = tkinter.Canvas(height=500, width=700)')
     fp.write('\nc.pack()\n')
-
+    
     for x in exportlines:
         print(x)
         fp.write('\n'+x)
@@ -315,8 +324,12 @@ def undo():
 
 def deleteall():
     global exportlines
-    c.delete("all")
-    exportlines.clear()
+
+    if messagebox.askokcancel("Are you sure?", "This will delete your canvas for ever (a long time)", icon = 'warning') == False:
+        print("cancelled deleteall")
+    else:
+        c.delete("all")
+        exportlines.clear()
 
 toolwindow = tkinter.Toplevel(win)
 toolwindow.geometry("300x700")

@@ -23,9 +23,12 @@ yc3 = 0
 clickc = 0
 roundto = 50
 ids = 0
-totids = 0
+linec = 0
 linethicc = 1
 getfirstpoint = True
+drawingngon = False
+
+clickcs = []
 
 exportlines = []
 
@@ -47,15 +50,16 @@ def callback(e):
     #print("Pointer is currently at %d, %d" %(x,y))
 
 def click(e):
-    global xc1,xc2,yc1,yc2,xc3,yc3,clickc,roundto, exportlines, ids, getfirstpoint, totids
+    global xc1,xc2,yc1,yc2,xc3,yc3,clickc,roundto, exportlines, ids, getfirstpoint, clickcs, drawingngon, linethicc, linec
     
     clickc += 1
     print("Clicked")
+
     if clickc == 1:
         xc1 = round(x/roundto)*roundto
         yc1 = round(y/roundto)*roundto
+
     if clickc == 2:
-        ids = totids
         if mode == "ngon" and getfirstpoint == False:
             xc1 = xc2
             yc1 = yc2
@@ -76,37 +80,33 @@ def click(e):
             print(fillcolor, isfilltransparent)
             if isfilltransparent == True:
                 ids += 1
-                totids += 1
                 c.create_rectangle(xc1,yc1,xc2,yc2, fill="", outline=linecolor, width=linethicc)
                 exportlines.append("c.create_rectangle("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", width="+str(linethicc)+",fill='', outline='"+linecolor+"')")
             elif isfilltransparent == False:
                 ids += 1
-                totids += 1
                 c.create_rectangle(xc1,yc1,xc2,yc2, fill=fillcolor, outline=linecolor, width=linethicc)
                 exportlines.append("c.create_rectangle("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", width="+str(linethicc)+",fill='"+fillcolor+"', outline='"+linecolor+"')")
         if mode == "oval":
             if isfilltransparent == True:
                 ids += 1
-                totids += 1
                 c.create_oval(xc1,yc1,xc2,yc2, fill="", outline=linecolor, width=linethicc)
                 exportlines.append("c.create_oval("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", width="+str(linethicc)+",fill='', outline='"+linecolor+"')")
             elif isfilltransparent == False:
                 ids += 1
-                totids += 1
                 c.create_oval(xc1,yc1,xc2,yc2, fill=fillcolor, outline=linecolor, width=linethicc)
                 exportlines.append("c.create_oval("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", width="+str(linethicc)+",fill='"+fillcolor+"', outline='"+linecolor+"')")
         if mode == "line":
             ids += 1
-            totids += 1
             c.create_line(xc1,yc1,xc2,yc2, fill=linecolor, width=linethicc)
             exportlines.append("c.create_line("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", width="+str(linethicc)+", fill='"+linecolor+"')")
         print(exportlines)
-        if mode == "ngon": # I am very aware that this is quite the workaround but i cant figure out how to make create_polygon work with a possibly infinite amount of coordinates.
+        getfirstpoint = False
+        if mode == "ngon":
             ids += 1
-            totids += 1
+            linec += 1
             getfirstpoint = False
-            c.create_line(xc1,yc1,xc2,yc2, fill=linecolor, width=linethicc)
-            exportlines.append("c.create_line("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", width="+str(linethicc)+", fill='"+linecolor+"')")
+            c.create_line(xc1,yc1,xc2,yc2, width=linethicc, fill="gray")
+            #exportlines.append("c.create_line("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", width="+str(linethicc)+", fill='"+linecolor+"')")
 
             
 
@@ -114,7 +114,6 @@ def click(e):
         linethicc = thicc.get()
         if mode == "triangle":
             ids += 1
-            totids += 1
             clickc=0
             xc3 = round(x/roundto)*roundto
             yc3 = round(y/roundto)*roundto
@@ -126,6 +125,46 @@ def click(e):
                 c.create_polygon(xc1,yc1,xc2,yc2,xc3,yc3, fill=fillcolor, outline=linecolor, width=linethicc)
                 exportlines.append("c.create_polygon("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+","+str(xc3)+","+str(yc3)+", fill='"+fillcolor+"',outline='"+linecolor+"', width="+str(linethicc)+")")
     
+    if mode == 'ngon':
+        clickcs.append(round(x/roundto)*roundto)
+        clickcs.append(round(y/roundto)*roundto)
+        
+        print(clickcs)
+
+
+
+def drawngon():
+    global ids, clickcs, fillcolor, linecolor, linethicc, c, linec
+    
+    print("drawngon")
+    print(linec-1)
+    for x in range(linec):
+        print(x)
+        c.delete(ids)
+        ids -= 1
+
+    
+    linethicc = thicc.get()
+
+    if isfilltransparent == True:
+        c.create_polygon(clickcs, fill="", outline= linecolor, width=linethicc)
+        exportlines.append("c.create_polygon("+str(clickcs)+", fill='', outline='"+linecolor+"', width="+str(linethicc)+")")
+    elif isfilltransparent == False:
+        c.create_polygon(clickcs, fill=fillcolor, outline= linecolor, width=linethicc)
+        exportlines.append("c.create_polygon("+str(clickcs)+", fill='"+fillcolor+"', outline='"+linecolor+"', width="+str(linethicc)+")")
+    
+    print("still drawngon")
+
+    del clickcs [:]
+    linec = 0
+
+    print("CLEARED clickcs", clickcs)
+
+    print("end drawngon")
+
+    ids += 1
+        
+
 win.bind('<Motion>',callback)
 win.bind("<Button-1>", click)
 
@@ -172,10 +211,19 @@ def modetriangle():
     trianglebutton.configure(bg="#BDBDBD")
     ngonbutton.configure(bg="#FFFFFF")
 def modengon():
-    global mode, rectanglebutton,ovalbutton,linebutton,trianglebutton,ngonbutton,clickc,getfirstpoint
+    global mode, rectanglebutton,ovalbutton,linebutton,trianglebutton,ngonbutton,clickc,getfirstpoint, drawingngon
     clickc = 0
     getfirstpoint = True
     mode = "ngon"
+
+    if drawingngon == False:
+        drawingngon = True
+        ngonbutton.configure(text="Polygon (click again to stop drawing)")
+    elif drawingngon == True:
+        ngonbutton.configure(text="Polygon (click to start drawing again)")
+        drawingngon = False
+        drawngon()
+
     print(mode)
     rectanglebutton.configure(bg="#FFFFFF")
     ovalbutton.configure(bg="#FFFFFF")
@@ -240,13 +288,13 @@ def getter():
 #generate()
 
 def undo():
-    global ids, totids
+    global ids
     c.delete(ids)
 
     ids -= 1
     exportlines.pop()
     print(exportlines, type(exportlines))
-    print(ids, totids)
+    print(ids)
 
 def deleteall():
     c.delete("all")
@@ -273,7 +321,7 @@ linebutton = tkinter.Button(toolwindow, text="Line (uses OUTLINE color not FILL 
 linebutton.pack()
 trianglebutton = tkinter.Button(toolwindow, text="Triangle", command=modetriangle)
 trianglebutton.pack()
-ngonbutton = tkinter.Button(toolwindow, text="N-gon (or just many lines)", command=modengon)
+ngonbutton = tkinter.Button(toolwindow, text="Polygon (click to start drawing)", command=modengon)
 ngonbutton.pack()
 
 collabel = tkinter.Label(toolwindow, text="Colors and thickness", font="Roboto 14").pack()

@@ -263,7 +263,7 @@ def togglefilltransparent():
 
 
 
-def generate():
+def exportpy():
     print('generating')
     fp = open('tkinter_drawing.py', 'w')
     fp.write('#Made in DrawTk by TobaT3\n')
@@ -279,7 +279,7 @@ def generate():
     print('generated')
 
 
-def getter():
+def exportpng():
     x=win.winfo_rootx()+c.winfo_x()
     y=win.winfo_rooty()+c.winfo_y()
     x1=x+c.winfo_width()
@@ -293,7 +293,6 @@ def getter():
 def undo():
     global ids, totids
     c.delete(ids)
-
     ids -= 1
     exportlines.pop()
     print(exportlines, type(exportlines))
@@ -350,8 +349,8 @@ snapp.set(roundto)
 explabel = tkinter.Label(toolwindow, text="Export", font="Roboto 14").pack()
 warnlabel2 = tkinter.Label(toolwindow, text="WARNING: Will overwrite previously generated files", fg="red").pack()
 warnlabel3 = tkinter.Label(toolwindow, text="Copy the tkinter_drawing files somewhere else \n if you dont want to lose them", fg="red").pack()
-exportbut = tkinter.Button(toolwindow, text="export to .py", command=generate).pack()
-imgbut = tkinter.Button(toolwindow, text="export to .png", command=getter).pack()
+exportbut = tkinter.Button(toolwindow, text="export to .py", command=exportpy).pack()
+imgbut = tkinter.Button(toolwindow, text="export to .png", command=exportpng).pack()
 
 warnlabel = tkinter.Label(toolwindow, text="WARNING: Will delete everything", fg="red").pack()
 deletebut = tkinter.Button(toolwindow, text="CLEAR CANVAS", command=deleteall, bg="red").pack()

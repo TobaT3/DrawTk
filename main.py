@@ -12,6 +12,13 @@ win.title("TkPaint Canvas")
 c = tkinter.Canvas(win, height=500, width=700, highlightthickness=0,borderwidth=0)
 c.pack()
 
+screen_width = win.winfo_screenwidth()
+screen_height = win.winfo_screenheight()
+center_x = int(screen_width/2 - 700 / 2)
+center_y = int(screen_height/2 - 500 / 2)
+win.geometry(f'{700}x{500}+{center_x}+{center_y}')
+
+
 mode = "rectangle"
 x = 0
 y = 0
@@ -303,6 +310,7 @@ def exportpy():
 
 
 def exportpng():
+    #Thanks to B.Jenkins on stack overflow for https://stackoverflow.com/a/38645917/15888488 (yes its like 6 years old but it still works)
     x=win.winfo_rootx()+c.winfo_x()
     y=win.winfo_rooty()+c.winfo_y()
     x1=x+c.winfo_width()
@@ -335,6 +343,13 @@ toolwindow = tkinter.Toplevel(win)
 toolwindow.geometry("300x700")
 toolwindow.title("Toolbox")
 toolwindow.resizable(False, False)
+
+screen_width = toolwindow.winfo_screenwidth()
+screen_height = toolwindow.winfo_screenheight()
+center_x = int(screen_width/2 - 700 / 2)
+center_y = int(screen_height/2 - 500 / 2)
+toolwindow.geometry(f'{300}x{700}+{center_x-350}+{center_y}')
+
 
 #lbl = tkinter.Label(toolwindow, text="I am in this toolwindow thing right").pack()
 

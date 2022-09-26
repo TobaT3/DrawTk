@@ -1,7 +1,8 @@
 from glob import escape
 import tkinter
-from tkinter import HORIZONTAL, colorchooser
+from tkinter import HORIZONTAL, colorchooser, filedialog
 from PIL import ImageGrab
+import pathlib
 
 
 win = tkinter.Tk()
@@ -53,7 +54,7 @@ def callback(e):
     #print("Pointer is currently at %d, %d" %(x,y))
 
 def click(e):
-    global xc1,xc2,yc1,yc2,xc3,yc3,clickc,roundto, exportlines, ids, getfirstpoint, clickcs, drawingngon, linethicc, linec, totids
+    global xc1,xc2,yc1,yc2,xc3,yc3,clickc,roundto, exportlines, ids, getfirstpoint, clickcs, drawingngon, linethicc, linec, totids, thicc
     
     
     ids = totids
@@ -134,8 +135,6 @@ def click(e):
         
         print(clickcs)
 
-
-
 def drawngon():
     global ids, clickcs, fillcolor, linecolor, linethicc, c, linec, totids
     
@@ -163,9 +162,7 @@ def drawngon():
 
     print("CLEARED clickcs", clickcs)
     
-    print("end drawngon")
-
-    
+    print("end drawngon")    
         
 
 win.bind('<Motion>',callback)
@@ -261,12 +258,26 @@ def togglefilltransparent():
         filltransparentbut.configure(bg="#BDBDBD")
         filltransparentbut.config(text="Toggle Fill Transparent (True)")
 
+def load():
+    global ids, totids
 
+    fp = filedialog.askopenfile(initialdir = pathlib.Path(__file__).parent.resolve(), title = "Open a DrawTk generated .py file", filetypes=[("Python file", ".py")], defaultextension=".py")
+
+    i = 0
+    for x in fp:
+        i += 1 
+        if i > 6 and x != "tkinter.mainloop()":
+            exec(x)
+            totids += 1
+            ids += 1
 
 def exportpy():
+
+    fp = filedialog.asksaveasfile(initialdir = pathlib.Path(__file__).parent.resolve(), title = "Select a .py file to export to", filetypes=[("Python file", ".py")], defaultextension=".py")
+
     print('generating')
-    fp = open('tkinter_drawing.py', 'w')
-    fp.write('#Made in DrawTk by TobaT3\n')
+    #fp = open(filename, 'w')
+    fp.write('#If you want to load this file make sure lines 1-6 are not modified\n')
     fp.write('\nimport tkinter')
     fp.write('\nc = tkinter.Canvas(height=500, width=700)')
     fp.write('\nc.pack()\n')
@@ -274,6 +285,9 @@ def exportpy():
     for x in exportlines:
         print(x)
         fp.write('\n'+x)
+    
+    fp.write("\ntkinter.mainloop()")
+    fp.write("\n#Made in DrawTk by TobaT3")
 
     fp.close()
     print('generated')
@@ -285,7 +299,8 @@ def exportpng():
     x1=x+c.winfo_width()
     y1=y+c.winfo_height()
     
-    ImageGrab.grab().crop((x,y,x1,y1)).save("tkinter_drawing.png")
+    filename = filedialog.asksaveasfilename(initialdir = pathlib.Path(__file__).parent.resolve(), title = "Select an image file to export to", filetypes=[("PNG", ".png"), ("JPEG", ".jpeg"), ("TIFF", ".tiff"), ("BMP", ".bmp")], defaultextension=".png")
+    ImageGrab.grab().crop((x,y,x1,y1)).save(filename)
 
 
 #generate()
@@ -299,10 +314,12 @@ def undo():
     print(ids)
 
 def deleteall():
+    global exportlines
     c.delete("all")
+    exportlines.clear()
 
 toolwindow = tkinter.Toplevel(win)
-toolwindow.geometry("300x705")
+toolwindow.geometry("300x700")
 toolwindow.title("Toolbox")
 toolwindow.resizable(False, False)
 
@@ -339,6 +356,8 @@ colpickbut2.pack()
 thicc = tkinter.Scale(toolwindow, from_=1, to=75, orient=HORIZONTAL, tickinterval=10, length=200, label="Line Width", resolution=5)
 thicc.pack()
 
+deletebut = tkinter.Button(toolwindow, text="Load", command=load).pack()
+
 setlabel = tkinter.Label(toolwindow, text="Other", font="Roboto 14").pack()
 
 snapp = tkinter.Scale(toolwindow, from_=0, to=300, orient=HORIZONTAL, length=200, label="Snapping to every (0 to turn off)", resolution=5)
@@ -347,10 +366,10 @@ snapp.set(roundto)
 
 
 explabel = tkinter.Label(toolwindow, text="Export", font="Roboto 14").pack()
-warnlabel2 = tkinter.Label(toolwindow, text="WARNING: Will overwrite previously generated files", fg="red").pack()
-warnlabel3 = tkinter.Label(toolwindow, text="Copy the tkinter_drawing files somewhere else \n if you dont want to lose them", fg="red").pack()
+#warnlabel2 = tkinter.Label(toolwindow, text="WARNING: Will overwrite previously generated files", fg="red").pack()
+#warnlabel3 = tkinter.Label(toolwindow, text="Copy the tkinter_drawing files somewhere else \n if you dont want to lose them", fg="red").pack()
 exportbut = tkinter.Button(toolwindow, text="export to .py", command=exportpy).pack()
-imgbut = tkinter.Button(toolwindow, text="export to .png", command=exportpng).pack()
+imgbut = tkinter.Button(toolwindow, text="export to image", command=exportpng).pack()
 
 warnlabel = tkinter.Label(toolwindow, text="WARNING: Will delete everything", fg="red").pack()
 deletebut = tkinter.Button(toolwindow, text="CLEAR CANVAS", command=deleteall, bg="red").pack()

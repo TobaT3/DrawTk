@@ -275,13 +275,6 @@ def load():
     for x in fp:
         i += 1
 
-        if i == 1:
-            if x != "#If you want to load this file make sure lines 1-6 are not modified": #The simplest check to make it so you dont load a bad python file
-                messagebox.showerror('Error loading file', "Make sure the file you're using was generated in drawtk\n(or was modified in a way that it works as a drawtk generated file)\n\n i know this sounds way too complicated just make sure you're not loading in a virus or a funny rickroll cmon")
-                break
-                
-
-
         if i > 6 and x != "tkinter.mainloop()":
             exec(x)
             totids += 1

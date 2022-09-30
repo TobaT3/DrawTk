@@ -3,6 +3,7 @@ import tkinter
 from tkinter import HORIZONTAL, colorchooser, filedialog, messagebox
 from PIL import ImageGrab
 import pathlib
+import tkfontchooser
 
 
 win = tkinter.Tk()
@@ -36,6 +37,9 @@ linec = 0
 linethicc = 1
 getfirstpoint = True
 drawingngon = False
+text = ""
+font = "Helvetica 15"
+textid = 999999999999
 
 clickcs = []
 
@@ -61,7 +65,7 @@ def callback(e):
     #print("Pointer is currently at %d, %d" %(x,y))
 
 def click(e):
-    global xc1,xc2,yc1,yc2,xc3,yc3,clickc,roundto, exportlines, ids, getfirstpoint, clickcs, drawingngon, linethicc, linec, totids, thicc
+    global xc1,xc2,yc1,yc2,xc3,yc3,clickc,roundto, exportlines, ids, getfirstpoint, clickcs, drawingngon, linethicc, linec, totids, thicc, textid
     
     
     ids = totids
@@ -141,6 +145,33 @@ def click(e):
         clickcs.append(round(y/roundto)*roundto)
         
         print(clickcs)
+    
+    if mode == 'text':
+        xc1 = round(x/roundto)*roundto
+        yc1 = round(y/roundto)*roundto
+
+        c.delete(textid)
+        c.create_text(xc1,yc1,text=text)
+        ids += 1
+        totids += 1
+        textid = totids
+
+def onKeyPress(event):
+    global textid, totids, text, totids, ids, xc1,xc2, font
+    
+    if mode == "text":
+        if event.keysym != "BackSpace":
+            print("you pressed %s\n" % (event.char))
+            text = text+event.char
+        elif event.keysym == "BackSpace":
+            print("backspace")
+            text = text[:-1]
+
+        c.delete(textid)
+        c.create_text(xc1,yc1,text=text, font=font)
+        ids += 1
+        totids += 1
+        textid = totids
 
 def drawngon():
     global ids, clickcs, fillcolor, linecolor, linethicc, c, linec, totids
@@ -170,10 +201,21 @@ def drawngon():
     print("CLEARED clickcs", clickcs)
     
     print("end drawngon")    
-        
+def donetext():
+    global textid, totids, text, totids, ids, xc1,xc2, font
+
+    c.delete(textid)
+    c.create_text(xc1,yc1,text=text, font=font)
+    ids += 1
+    totids += 1
+    textid = 999999
+    text = ""
+
+
 
 win.bind('<Motion>',callback)
 win.bind("<Button-1>", click)
+win.bind('<KeyPress>', onKeyPress)
 
 
 def moderectangle():
@@ -187,6 +229,7 @@ def moderectangle():
     linebutton.configure(bg="#FFFFFF")
     trianglebutton.configure(bg="#FFFFFF")
     ngonbutton.configure(bg="#FFFFFF")
+    textbutton.configure(bg="#FFFFFF")
 def modeoval():
     global mode, rectanglebutton,ovalbutton,linebutton,trianglebutton,ngonbutton,clickc
     clickc = 0
@@ -197,6 +240,7 @@ def modeoval():
     linebutton.configure(bg="#FFFFFF")
     trianglebutton.configure(bg="#FFFFFF")
     ngonbutton.configure(bg="#FFFFFF")
+    textbutton.configure(bg="#FFFFFF")
 def modeline():
     global mode, rectanglebutton,ovalbutton,linebutton,trianglebutton,ngonbutton,clickc
     clickc = 0
@@ -207,6 +251,7 @@ def modeline():
     linebutton.configure(bg="#BDBDBD")
     trianglebutton.configure(bg="#FFFFFF")
     ngonbutton.configure(bg="#FFFFFF")
+    textbutton.configure(bg="#FFFFFF")
 def modetriangle():
     global mode, rectanglebutton,ovalbutton,linebutton,trianglebutton,ngonbutton,clickc
     clickc = 0
@@ -217,6 +262,7 @@ def modetriangle():
     linebutton.configure(bg="#FFFFFF")
     trianglebutton.configure(bg="#BDBDBD")
     ngonbutton.configure(bg="#FFFFFF")
+    textbutton.configure(bg="#FFFFFF")
 def modengon():
     global mode, rectanglebutton,ovalbutton,linebutton,trianglebutton,ngonbutton,clickc,getfirstpoint, drawingngon
     clickc = 0
@@ -237,6 +283,49 @@ def modengon():
     linebutton.configure(bg="#FFFFFF")
     trianglebutton.configure(bg="#FFFFFF")
     ngonbutton.configure(bg="#BDBDBD")
+    textbutton.configure(bg="#FFFFFF")
+def modetext():
+    global mode, rectanglebutton,ovalbutton,linebutton,trianglebutton,ngonbutton,clickc,getfirstpoint, drawingngon, toolwindow, textwindow, textwindow
+    clickc = 0
+    mode = "text"
+
+    createtextwindow()
+
+    print(mode)
+    rectanglebutton.configure(bg="#FFFFFF")
+    ovalbutton.configure(bg="#FFFFFF")
+    linebutton.configure(bg="#FFFFFF")
+    trianglebutton.configure(bg="#FFFFFF")
+    ngonbutton.configure(bg="#FFFFFF")
+    textbutton.configure(bg='#BDBDBD')
+
+def fontchooser():
+    global font, fontbutton
+
+    font = tkfontchooser.askfont()
+    print(font)
+
+    fontstr = font["family"]+" "+str(font["size"])
+
+    fontbutton.configure(text="Change font and size ("+fontstr+")")
+
+def createtextwindow():
+    global textwindow, fontbutton
+
+    textwindow = tkinter.Toplevel(toolwindow)
+    textwindow.geometry("450x60")
+    textwindow.title("Text")
+    textwindow.resizable(False, False)
+
+    fontbutton = tkinter.Button(textwindow, text="Change font and size (Calibri 16)", command=fontchooser)
+    fontbutton.pack()
+
+    donebutton = tkinter.Button(textwindow, text="DONE", command=donetext)
+    donebutton.pack()
+
+    textwindow.bind('<KeyPress>', onKeyPress) # so you can type in both windows; annoyed me when you couldnt
+
+
 
 def opencolorpick():
     global fillcolor,colpickbut
@@ -336,6 +425,7 @@ toolwindow = tkinter.Toplevel(win)
 toolwindow.geometry("300x700")
 toolwindow.title("Toolbox")
 toolwindow.resizable(False, False)
+toolwindow.overrideredirect(True)
 
 screen_width = toolwindow.winfo_screenwidth()
 screen_height = toolwindow.winfo_screenheight()
@@ -343,6 +433,13 @@ center_x = int(screen_width/2 - 700 / 2)
 center_y = int(screen_height/2 - 500 / 2)
 toolwindow.geometry(f'{300}x{700}+{center_x-350}+{center_y}')
 
+def movetoolwin(e):
+    x = win.winfo_x()
+    y = win.winfo_y()
+
+    toolwindow.geometry(f'{300}x{700}+{x-300}+{y}')
+
+win.bind('<Configure>', movetoolwin)
 
 #lbl = tkinter.Label(toolwindow, text="I am in this toolwindow thing right").pack()
 
@@ -363,6 +460,8 @@ trianglebutton = tkinter.Button(toolwindow, text="Triangle", command=modetriangl
 trianglebutton.pack()
 ngonbutton = tkinter.Button(toolwindow, text="Polygon (click to start drawing)", command=modengon)
 ngonbutton.pack()
+textbutton = tkinter.Button(toolwindow, text="Text", command=modetext)
+textbutton.pack()
 
 collabel = tkinter.Label(toolwindow, text="Colors and thickness", font="Roboto 14").pack()
 colpickbut = tkinter.Button(toolwindow, text="Fill Color", command=opencolorpick, bg=fillcolor)
@@ -396,6 +495,7 @@ warnlabel = tkinter.Label(toolwindow, text="WARNING: Will delete everything", fg
 deletebut = tkinter.Button(toolwindow, text="CLEAR CANVAS", command=deleteall, bg="red").pack()
 
 melabel = tkinter.Label(toolwindow, text="Made by TobaT3", font="Roboto 8").pack()
+
 
 win.mainloop()
 toolwindow.mainloop()

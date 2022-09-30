@@ -4,12 +4,15 @@ from tkinter import HORIZONTAL, colorchooser, filedialog, messagebox
 from PIL import ImageGrab
 import pathlib
 import tkfontchooser
+#import pyi_splash #doesnt actually import anything; should be uncommented when building with pyinstaller
 
+
+#pyi_splash.close() # see line 7
 
 win = tkinter.Tk()
 win.resizable(False, False)
 win.title("TkPaint Canvas")
-win.iconbitmap("drawtk.ico")
+#win.iconbitmap("drawtk.ico")
 
 c = tkinter.Canvas(win, height=500, width=700, highlightthickness=0,borderwidth=0)
 c.pack()

@@ -201,7 +201,15 @@ def drawngon():
     print("CLEARED clickcs", clickcs)
     
     print("end drawngon")    
-        
+def donetext():
+    global textid, totids, text, totids, ids, xc1,xc2, font
+
+    c.delete(textid)
+    c.create_text(xc1,yc1,text=text, font=font)
+    ids += 1
+    totids += 1
+    textid = 999999
+    text = ""
 
 
 
@@ -221,6 +229,7 @@ def moderectangle():
     linebutton.configure(bg="#FFFFFF")
     trianglebutton.configure(bg="#FFFFFF")
     ngonbutton.configure(bg="#FFFFFF")
+    textbutton.configure(bg="#FFFFFF")
 def modeoval():
     global mode, rectanglebutton,ovalbutton,linebutton,trianglebutton,ngonbutton,clickc
     clickc = 0
@@ -231,6 +240,7 @@ def modeoval():
     linebutton.configure(bg="#FFFFFF")
     trianglebutton.configure(bg="#FFFFFF")
     ngonbutton.configure(bg="#FFFFFF")
+    textbutton.configure(bg="#FFFFFF")
 def modeline():
     global mode, rectanglebutton,ovalbutton,linebutton,trianglebutton,ngonbutton,clickc
     clickc = 0
@@ -241,6 +251,7 @@ def modeline():
     linebutton.configure(bg="#BDBDBD")
     trianglebutton.configure(bg="#FFFFFF")
     ngonbutton.configure(bg="#FFFFFF")
+    textbutton.configure(bg="#FFFFFF")
 def modetriangle():
     global mode, rectanglebutton,ovalbutton,linebutton,trianglebutton,ngonbutton,clickc
     clickc = 0
@@ -251,6 +262,7 @@ def modetriangle():
     linebutton.configure(bg="#FFFFFF")
     trianglebutton.configure(bg="#BDBDBD")
     ngonbutton.configure(bg="#FFFFFF")
+    textbutton.configure(bg="#FFFFFF")
 def modengon():
     global mode, rectanglebutton,ovalbutton,linebutton,trianglebutton,ngonbutton,clickc,getfirstpoint, drawingngon
     clickc = 0
@@ -271,8 +283,9 @@ def modengon():
     linebutton.configure(bg="#FFFFFF")
     trianglebutton.configure(bg="#FFFFFF")
     ngonbutton.configure(bg="#BDBDBD")
+    textbutton.configure(bg="#FFFFFF")
 def modetext():
-    global mode, rectanglebutton,ovalbutton,linebutton,trianglebutton,ngonbutton,clickc,getfirstpoint, drawingngon, toolwindow, textwindow
+    global mode, rectanglebutton,ovalbutton,linebutton,trianglebutton,ngonbutton,clickc,getfirstpoint, drawingngon, toolwindow, textwindow, textwindow
     clickc = 0
     mode = "text"
 
@@ -283,23 +296,32 @@ def modetext():
     ovalbutton.configure(bg="#FFFFFF")
     linebutton.configure(bg="#FFFFFF")
     trianglebutton.configure(bg="#FFFFFF")
-    ngonbutton.configure(bg="#BDBDBD")
+    ngonbutton.configure(bg="#FFFFFF")
+    textbutton.configure(bg='#BDBDBD')
 
 def fontchooser():
-    global font
+    global font, fontbutton
 
     font = tkfontchooser.askfont()
+    print(font)
+
+    fontstr = font["family"]+" "+str(font["size"])
+
+    fontbutton.configure(text="Change font and size ("+fontstr+")")
 
 def createtextwindow():
-    global textwindow
+    global textwindow, fontbutton
 
     textwindow = tkinter.Toplevel(toolwindow)
-    textwindow.geometry("300x300")
+    textwindow.geometry("450x60")
     textwindow.title("Text")
     textwindow.resizable(False, False)
 
-    fontbutton = tkinter.Button(textwindow, text="Change font", command=fontchooser)
+    fontbutton = tkinter.Button(textwindow, text="Change font and size (Calibri 16)", command=fontchooser)
     fontbutton.pack()
+
+    donebutton = tkinter.Button(textwindow, text="DONE", command=donetext)
+    donebutton.pack()
 
     textwindow.bind('<KeyPress>', onKeyPress) # so you can type in both windows; annoyed me when you couldnt
 
@@ -403,6 +425,7 @@ toolwindow = tkinter.Toplevel(win)
 toolwindow.geometry("300x700")
 toolwindow.title("Toolbox")
 toolwindow.resizable(False, False)
+toolwindow.overrideredirect(True)
 
 screen_width = toolwindow.winfo_screenwidth()
 screen_height = toolwindow.winfo_screenheight()
@@ -410,6 +433,13 @@ center_x = int(screen_width/2 - 700 / 2)
 center_y = int(screen_height/2 - 500 / 2)
 toolwindow.geometry(f'{300}x{700}+{center_x-350}+{center_y}')
 
+def movetoolwin(e):
+    x = win.winfo_x()
+    y = win.winfo_y()
+
+    toolwindow.geometry(f'{300}x{700}+{x-300}+{y}')
+
+win.bind('<Configure>', movetoolwin)
 
 #lbl = tkinter.Label(toolwindow, text="I am in this toolwindow thing right").pack()
 
@@ -469,5 +499,3 @@ melabel = tkinter.Label(toolwindow, text="Made by TobaT3", font="Roboto 8").pack
 
 win.mainloop()
 toolwindow.mainloop()
-
-

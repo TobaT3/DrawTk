@@ -69,7 +69,7 @@ def callback(e):
     #print("Pointer is currently at %d, %d" %(x,y))
 
 def click(e):
-    global xc1,xc2,yc1,yc2,xc3,yc3,clickc,roundto, exportlines, ids, getfirstpoint, clickcs, drawingngon, linethicc, linec, totids, thicc, textid
+    global xc1,xc2,yc1,yc2,xc3,yc3,clickc,roundto, exportlines, ids, getfirstpoint, clickcs, drawingngon, linethicc, linec, totids, thicc, textid, font
     
     
     ids = totids
@@ -155,7 +155,7 @@ def click(e):
         yc1 = round(y/roundto)*roundto
 
         c.delete(textid)
-        c.create_text(xc1,yc1,text=text)
+        c.create_text(xc1,yc1,text=text, font=font)
         ids += 1
         totids += 1
         textid = totids
@@ -445,23 +445,23 @@ toolwindow = tkinter.Toplevel(win)
 toolwindow.geometry("300x700")
 toolwindow.title("Toolbox")
 toolwindow.resizable(False, False)
-toolwindow.overrideredirect(True)
 
 screen_width = toolwindow.winfo_screenwidth()
 screen_height = toolwindow.winfo_screenheight()
 center_x = int(screen_width/2 - 700 / 2)
 center_y = int(screen_height/2 - 500 / 2)
-toolwindow.geometry(f'{300}x{700}+{center_x-350}+{center_y}')
+toolwindow.geometry(f'{300}x{700}+{center_x-310}+{center_y}')
 
 def movetoolwin(e):
     x = win.winfo_x()
     y = win.winfo_y()
 
-    toolwindow.geometry(f'{300}x{700}+{x-300}+{y}')
+    toolwindow.geometry(f'{300}x{700}+{x-310}+{y}')
 
-    x = toolwindow.winfo_x()
-    y = toolwindow.winfo_y()
-    textwindow.geometry(f'{300}x{60}+{x-300}+{y+235}')
+    if mode == "text":
+        x = toolwindow.winfo_x()
+        y = toolwindow.winfo_y()
+        textwindow.geometry(f'{300}x{60}+{x-300}+{y+235}')
 
 
 win.bind('<Configure>', movetoolwin)

@@ -9,6 +9,7 @@ import tkfontchooser
 win = tkinter.Tk()
 win.resizable(False, False)
 win.title("TkPaint Canvas")
+win.iconbitmap("drawtk.ico")
 
 c = tkinter.Canvas(win, height=500, width=700, highlightthickness=0,borderwidth=0)
 c.pack()
@@ -230,6 +231,8 @@ def moderectangle():
     trianglebutton.configure(bg="#FFFFFF")
     ngonbutton.configure(bg="#FFFFFF")
     textbutton.configure(bg="#FFFFFF")
+
+    textwindow.destroy()
 def modeoval():
     global mode, rectanglebutton,ovalbutton,linebutton,trianglebutton,ngonbutton,clickc
     clickc = 0
@@ -241,6 +244,8 @@ def modeoval():
     trianglebutton.configure(bg="#FFFFFF")
     ngonbutton.configure(bg="#FFFFFF")
     textbutton.configure(bg="#FFFFFF")
+
+    textwindow.destroy()
 def modeline():
     global mode, rectanglebutton,ovalbutton,linebutton,trianglebutton,ngonbutton,clickc
     clickc = 0
@@ -252,6 +257,8 @@ def modeline():
     trianglebutton.configure(bg="#FFFFFF")
     ngonbutton.configure(bg="#FFFFFF")
     textbutton.configure(bg="#FFFFFF")
+
+    textwindow.destroy()
 def modetriangle():
     global mode, rectanglebutton,ovalbutton,linebutton,trianglebutton,ngonbutton,clickc
     clickc = 0
@@ -263,6 +270,8 @@ def modetriangle():
     trianglebutton.configure(bg="#BDBDBD")
     ngonbutton.configure(bg="#FFFFFF")
     textbutton.configure(bg="#FFFFFF")
+
+    textwindow.destroy()
 def modengon():
     global mode, rectanglebutton,ovalbutton,linebutton,trianglebutton,ngonbutton,clickc,getfirstpoint, drawingngon
     clickc = 0
@@ -284,6 +293,8 @@ def modengon():
     trianglebutton.configure(bg="#FFFFFF")
     ngonbutton.configure(bg="#BDBDBD")
     textbutton.configure(bg="#FFFFFF")
+
+    textwindow.destroy()
 def modetext():
     global mode, rectanglebutton,ovalbutton,linebutton,trianglebutton,ngonbutton,clickc,getfirstpoint, drawingngon, toolwindow, textwindow, textwindow
     clickc = 0
@@ -313,9 +324,14 @@ def createtextwindow():
     global textwindow, fontbutton
 
     textwindow = tkinter.Toplevel(toolwindow)
-    textwindow.geometry("450x60")
+    textwindow.geometry("300x100")
     textwindow.title("Text")
     textwindow.resizable(False, False)
+    textwindow.overrideredirect(True)
+
+    x = toolwindow.winfo_x()
+    y = toolwindow.winfo_y()
+    textwindow.geometry(f'{300}x{60}+{x-300}+{y+235}')
 
     fontbutton = tkinter.Button(textwindow, text="Change font and size (Calibri 16)", command=fontchooser)
     fontbutton.pack()
@@ -324,6 +340,7 @@ def createtextwindow():
     donebutton.pack()
 
     textwindow.bind('<KeyPress>', onKeyPress) # so you can type in both windows; annoyed me when you couldnt
+    
 
 
 
@@ -438,6 +455,11 @@ def movetoolwin(e):
     y = win.winfo_y()
 
     toolwindow.geometry(f'{300}x{700}+{x-300}+{y}')
+
+    x = toolwindow.winfo_x()
+    y = toolwindow.winfo_y()
+    textwindow.geometry(f'{300}x{60}+{x-300}+{y+235}')
+
 
 win.bind('<Configure>', movetoolwin)
 

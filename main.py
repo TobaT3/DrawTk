@@ -1,13 +1,12 @@
 from glob import escape
 import tkinter
-from tkinter import HORIZONTAL, colorchooser, filedialog, messagebox
+from tkinter import HORIZONTAL, colorchooser, filedialog, messagebox, font
 from PIL import ImageGrab
 import pathlib
 import tkfontchooser
-#import pyi_splash #doesnt actually import anything; should be uncommented when building with pyinstaller
 
-
-#pyi_splash.close() # see line 7
+#import pyi_splash #doesnt actually import anything; but should be uncommented when building with pyinstaller so the splash screen closes
+#pyi_splash.close()
 
 win = tkinter.Tk()
 win.resizable(False, False)
@@ -317,6 +316,9 @@ def fontchooser():
     global font, fontbutton
 
     font = tkfontchooser.askfont()
+
+    font = tkinter.font.Font(root=None, family=font["family"], size=font["size"], weight=font["weight"], slant=font["slant"], underline=font["underline"], overstrike=font["overstrike"])
+
     print(font)
 
     fontstr = font["family"]+" "+str(font["size"])
@@ -510,10 +512,10 @@ snapp.pack()
 snapp.set(roundto)
 
 
-explabel = tkinter.Label(toolwindow, text="Export", font="Roboto 14").pack()
+explabel = tkinter.Label(toolwindow, text="Save and Export", font="Roboto 14").pack()
 #warnlabel2 = tkinter.Label(toolwindow, text="WARNING: Will overwrite previously generated files", fg="red").pack()
 #warnlabel3 = tkinter.Label(toolwindow, text="Copy the tkinter_drawing files somewhere else \n if you dont want to lose them", fg="red").pack()
-exportbut = tkinter.Button(toolwindow, text="export to .py", command=exportpy).pack()
+exportbut = tkinter.Button(toolwindow, text="Save - export to .py", command=exportpy).pack()
 imgbut = tkinter.Button(toolwindow, text="export to image", command=exportpng).pack()
 
 warnlabel = tkinter.Label(toolwindow, text="WARNING: Will delete everything", fg="red").pack()

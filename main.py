@@ -42,6 +42,7 @@ getfirstpoint = True
 drawingngon = False
 text = ""
 font = "Helvetica 15"
+fontstr = "Helvetica 15"
 textid = 999999999999
 
 clickcs = []
@@ -155,9 +156,20 @@ def click(e):
 
         c.delete(textid)
         c.create_text(xc1,yc1,text=text, font=font)
+        print(exportlines)
         ids += 1
         totids += 1
         textid = totids
+
+    if mode == 'delete': # thanks https://stackoverflow.com/questions/38982313/python-tkinter-identify-object-on-click
+        
+        print(c.find_closest(e.x, e.y)[0])
+        if len(exportlines) != 0: #then something has gone wrong but hey it wont throw errors at me
+            exportlines.pop(c.find_closest(e.x, e.y)[0]-1)
+        c.delete(c.find_closest(e.x, e.y))
+        print(exportlines)
+        
+
 
 def onKeyPress(event):
     global textid, totids, text, totids, ids, xc1,xc2, font
@@ -205,10 +217,11 @@ def drawngon():
     
     print("end drawngon")    
 def donetext():
-    global textid, totids, text, totids, ids, xc1,xc2, font
+    global textid, totids, text, totids, ids, xc1,xc2, font, exportlines
 
     c.delete(textid)
     c.create_text(xc1,yc1,text=text, font=font)
+    exportlines.append("c.create_text("+str(xc1)+','+str(yc1)+", text='"+text+"', font='"+str(font)+"')")
     ids += 1
     totids += 1
     textid = 999999
@@ -221,8 +234,25 @@ win.bind("<Button-1>", click)
 win.bind('<KeyPress>', onKeyPress)
 
 
+def modedelete():
+    global mode, rectanglebutton,ovalbutton,linebutton,trianglebutton,ngonbutton,clickc, delobjbutton
+    clickc = 0
+    mode = "delete"
+    print(mode)
+
+    rectanglebutton.configure(bg="#FFFFFF")
+    ovalbutton.configure(bg="#FFFFFF")
+    linebutton.configure(bg="#FFFFFF")
+    trianglebutton.configure(bg="#FFFFFF")
+    ngonbutton.configure(bg="#FFFFFF")
+    textbutton.configure(bg="#FFFFFF")
+    delobjbutton.configure(bg="#BDBDBD")
+
+    if mode=="text":
+        donetext()
+        textwindow.destroy()
 def moderectangle():
-    global mode, rectanglebutton,ovalbutton,linebutton,trianglebutton,ngonbutton,clickc
+    global mode, rectanglebutton,ovalbutton,linebutton,trianglebutton,ngonbutton,clickc, delobjbutton
     clickc = 0
     mode = "rectangle"
     print(mode)
@@ -233,10 +263,13 @@ def moderectangle():
     trianglebutton.configure(bg="#FFFFFF")
     ngonbutton.configure(bg="#FFFFFF")
     textbutton.configure(bg="#FFFFFF")
+    delobjbutton.configure(bg="#FFFFFF")
 
-    textwindow.destroy()
+    if mode=="text":
+        donetext()
+        textwindow.destroy()
 def modeoval():
-    global mode, rectanglebutton,ovalbutton,linebutton,trianglebutton,ngonbutton,clickc
+    global mode, rectanglebutton,ovalbutton,linebutton,trianglebutton,ngonbutton,clickc, delobjbutton
     clickc = 0
     mode = "oval"
     print(mode)
@@ -246,10 +279,13 @@ def modeoval():
     trianglebutton.configure(bg="#FFFFFF")
     ngonbutton.configure(bg="#FFFFFF")
     textbutton.configure(bg="#FFFFFF")
+    delobjbutton.configure(bg="#FFFFFF")
 
-    textwindow.destroy()
+    if mode=="text":
+        donetext()
+        textwindow.destroy()
 def modeline():
-    global mode, rectanglebutton,ovalbutton,linebutton,trianglebutton,ngonbutton,clickc
+    global mode, rectanglebutton,ovalbutton,linebutton,trianglebutton,ngonbutton,clickc, delobjbutton
     clickc = 0
     mode = "line"
     print(mode)
@@ -259,10 +295,13 @@ def modeline():
     trianglebutton.configure(bg="#FFFFFF")
     ngonbutton.configure(bg="#FFFFFF")
     textbutton.configure(bg="#FFFFFF")
+    delobjbutton.configure(bg="#FFFFFF")
 
-    textwindow.destroy()
+    if mode=="text":
+        donetext()
+        textwindow.destroy()
 def modetriangle():
-    global mode, rectanglebutton,ovalbutton,linebutton,trianglebutton,ngonbutton,clickc
+    global mode, rectanglebutton,ovalbutton,linebutton,trianglebutton,ngonbutton,clickc, delobjbutton
     clickc = 0
     mode = "triangle"
     print(mode)
@@ -272,10 +311,13 @@ def modetriangle():
     trianglebutton.configure(bg="#BDBDBD")
     ngonbutton.configure(bg="#FFFFFF")
     textbutton.configure(bg="#FFFFFF")
+    delobjbutton.configure(bg="#FFFFFF")
 
-    textwindow.destroy()
+    if mode=="text":
+        donetext()
+        textwindow.destroy()
 def modengon():
-    global mode, rectanglebutton,ovalbutton,linebutton,trianglebutton,ngonbutton,clickc,getfirstpoint, drawingngon
+    global mode, rectanglebutton,ovalbutton,linebutton,trianglebutton,ngonbutton,clickc,getfirstpoint, drawingngon, delobjbutton
     clickc = 0
     getfirstpoint = True
     mode = "ngon"
@@ -295,10 +337,13 @@ def modengon():
     trianglebutton.configure(bg="#FFFFFF")
     ngonbutton.configure(bg="#BDBDBD")
     textbutton.configure(bg="#FFFFFF")
+    delobjbutton.configure(bg="#FFFFFF")
 
-    textwindow.destroy()
+    if mode=="text":
+        donetext()
+        textwindow.destroy()
 def modetext():
-    global mode, rectanglebutton,ovalbutton,linebutton,trianglebutton,ngonbutton,clickc,getfirstpoint, drawingngon, toolwindow, textwindow, textwindow
+    global mode, rectanglebutton,ovalbutton,linebutton,trianglebutton,ngonbutton,clickc,getfirstpoint, drawingngon, toolwindow, textwindow, textwindow, delobjbutton
     clickc = 0
     mode = "text"
 
@@ -311,6 +356,7 @@ def modetext():
     trianglebutton.configure(bg="#FFFFFF")
     ngonbutton.configure(bg="#FFFFFF")
     textbutton.configure(bg='#BDBDBD')
+    delobjbutton.configure(bg="#FFFFFF")
 
 def fontchooser():
     global font, fontbutton
@@ -326,7 +372,7 @@ def fontchooser():
     fontbutton.configure(text="Change font and size ("+fontstr+")")
 
 def createtextwindow():
-    global textwindow, fontbutton
+    global textwindow, fontbutton, fontstr
 
     textwindow = tkinter.Toplevel(toolwindow)
     textwindow.geometry("300x100")
@@ -338,7 +384,7 @@ def createtextwindow():
     y = toolwindow.winfo_y()
     textwindow.geometry(f'{300}x{60}+{x-300}+{y+235}')
 
-    fontbutton = tkinter.Button(textwindow, text="Change font and size (Calibri 16)", command=fontchooser)
+    fontbutton = tkinter.Button(textwindow, text="Change font and size "+str(fontstr), command=fontchooser)
     fontbutton.pack()
 
     donebutton = tkinter.Button(textwindow, text="DONE", command=donetext)
@@ -377,7 +423,7 @@ def togglefilltransparent():
         filltransparentbut.config(text="Toggle Fill Transparent (True)")
 
 def load():
-    global ids, totids
+    global ids, totids, exportlines
 
     fp = filedialog.askopenfile(initialdir = pathlib.Path(__file__).parent.resolve(), title = "Open a DrawTk generated .py file", filetypes=[("Python file", ".py")], defaultextension=".py")
 
@@ -388,6 +434,7 @@ def load():
 
         if i > 6 and x != "tkinter.mainloop()":
             exec(x)
+            exportlines.append(x)
             totids += 1
             ids += 1
 
@@ -475,6 +522,8 @@ poslabel = tkinter.Label(toolwindow, text="", font="Roboto 14")
 poslabel.pack(pady=10)
 
 undobutton = tkinter.Button(toolwindow, text="Undo", command=undo, bg="light green").pack()
+delobjbutton = tkinter.Button(toolwindow, text="Delete object", command=modedelete, bg="#FFFFFF")
+delobjbutton.pack(pady=5)
 
 toollabel = tkinter.Label(toolwindow, text="Tools", font="Roboto 14").pack()
 rectanglebutton = tkinter.Button(toolwindow, text="Rectangle", command=moderectangle, bg="#BDBDBD")

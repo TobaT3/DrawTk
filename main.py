@@ -35,7 +35,7 @@ yc3 = 0
 clickc = 0
 roundto = 50
 ids = 0
-totids = 0
+idlist = []
 linec = 0
 linethicc = 1
 getfirstpoint = True
@@ -59,8 +59,6 @@ def callback(e):
     x = e.x
     y = e.y
 
-    ids = totids
-
     roundto = snapp.get()
     if roundto == 0:
         roundto=1
@@ -69,10 +67,8 @@ def callback(e):
     #print("Pointer is currently at %d, %d" %(x,y))
 
 def click(e):
-    global xc1,xc2,yc1,yc2,xc3,yc3,clickc,roundto, exportlines, ids, getfirstpoint, clickcs, drawingngon, linethicc, linec, totids, thicc, textid, font
+    global xc1,xc2,yc1,yc2,xc3,yc3,clickc,roundto, exportlines, ids, getfirstpoint, clickcs, drawingngon, linethicc, linec, thicc, textid, font, idlist
     
-    
-    ids = totids
     clickc += 1
     print("Clicked")
 
@@ -100,28 +96,28 @@ def click(e):
             print(fillcolor, isfilltransparent)
             if isfilltransparent == True:
                 ids += 1
-                totids += 1
+                idlist.append(ids)
                 c.create_rectangle(xc1,yc1,xc2,yc2, fill="", outline=linecolor, width=linethicc)
                 exportlines.append("c.create_rectangle("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", width="+str(linethicc)+",fill='', outline='"+linecolor+"')")
             elif isfilltransparent == False:
                 ids += 1
-                totids += 1
+                idlist.append(ids)
                 c.create_rectangle(xc1,yc1,xc2,yc2, fill=fillcolor, outline=linecolor, width=linethicc)
                 exportlines.append("c.create_rectangle("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", width="+str(linethicc)+",fill='"+fillcolor+"', outline='"+linecolor+"')")
         if mode == "oval":
             if isfilltransparent == True:
                 ids += 1
-                totids += 1
+                idlist.append(ids)
                 c.create_oval(xc1,yc1,xc2,yc2, fill="", outline=linecolor, width=linethicc)
                 exportlines.append("c.create_oval("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", width="+str(linethicc)+",fill='', outline='"+linecolor+"')")
             elif isfilltransparent == False:
                 ids += 1
-                totids += 1
+                idlist.append(ids)
                 c.create_oval(xc1,yc1,xc2,yc2, fill=fillcolor, outline=linecolor, width=linethicc)
                 exportlines.append("c.create_oval("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", width="+str(linethicc)+",fill='"+fillcolor+"', outline='"+linecolor+"')")
         if mode == "line":
             ids += 1
-            totids += 1
+            idlist.append(ids)
             c.create_line(xc1,yc1,xc2,yc2, fill=linecolor, width=linethicc)
             exportlines.append("c.create_line("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", width="+str(linethicc)+", fill='"+linecolor+"')")
         print(exportlines)
@@ -132,7 +128,7 @@ def click(e):
         linethicc = thicc.get()
         if mode == "triangle":
             ids += 1
-            totids += 1
+            idlist.append(ids)
             clickc=0
             xc3 = round(x/roundto)*roundto
             yc3 = round(y/roundto)*roundto
@@ -158,21 +154,25 @@ def click(e):
         c.create_text(xc1,yc1,text=text, font=font)
         print(exportlines)
         ids += 1
-        totids += 1
-        textid = totids
+        textid = ids
 
     if mode == 'delete': # thanks https://stackoverflow.com/questions/38982313/python-tkinter-identify-object-on-click
         
-        print(c.find_closest(e.x, e.y)[0])
-        if len(exportlines) != 0: #then something has gone wrong but hey it wont throw errors at me
-            exportlines.pop(c.find_closest(e.x, e.y)[0]-1)
-        c.delete(c.find_closest(e.x, e.y))
+        delid = (c.find_closest(e.x, e.y)[0])
+        if len(exportlines) != 0: 
+            exportlines.pop(delid-1)
+        
+        
+        c.delete(delid)
+        idinlist = idlist.index(delid)
+        idinlist = idlist.pop(idinlist)
+
         print(exportlines)
         
 
 
 def onKeyPress(event):
-    global textid, totids, text, totids, ids, xc1,xc2, font
+    global textid, text, idlist, ids, xc1,xc2, font
     
     if mode == "text":
         if event.keysym != "BackSpace":
@@ -185,18 +185,17 @@ def onKeyPress(event):
         c.delete(textid)
         c.create_text(xc1,yc1,text=text, font=font)
         ids += 1
-        totids += 1
-        textid = totids
+        textid = ids
 
 def drawngon():
-    global ids, clickcs, fillcolor, linecolor, linethicc, c, linec, totids
+    global ids, clickcs, fillcolor, linecolor, linethicc, c, linec, idlist
     
     print("drawngon")
 
     
     linethicc = thicc.get()
     ids += 1
-    totids += 1
+    idlist.append(ids)
 
     if isfilltransparent == True:
         test = c.create_polygon(clickcs, fill="", outline= linecolor, width=linethicc)
@@ -217,13 +216,13 @@ def drawngon():
     
     print("end drawngon")    
 def donetext():
-    global textid, totids, text, totids, ids, xc1,xc2, font, exportlines
+    global textid, text, idlist, ids, xc1,xc2, font, exportlines
 
     c.delete(textid)
     c.create_text(xc1,yc1,text=text, font=font)
     exportlines.append("c.create_text("+str(xc1)+','+str(yc1)+", text='"+text+"', font='"+str(font)+"')")
     ids += 1
-    totids += 1
+    idlist.append(ids)
     textid = 999999
     text = ""
 
@@ -423,7 +422,7 @@ def togglefilltransparent():
         filltransparentbut.config(text="Toggle Fill Transparent (True)")
 
 def load():
-    global ids, totids, exportlines
+    global ids, idlist, exportlines
 
     fp = filedialog.askopenfile(initialdir = pathlib.Path(__file__).parent.resolve(), title = "Open a DrawTk generated .py file", filetypes=[("Python file", ".py")], defaultextension=".py")
 
@@ -435,8 +434,8 @@ def load():
         if i > 6 and x != "tkinter.mainloop()":
             exec(x)
             exportlines.append(x)
-            totids += 1
             ids += 1
+            idlist.append(ids)
 
 def exportpy():
 
@@ -474,12 +473,13 @@ def exportpng():
 #generate()
 
 def undo():
-    global ids, totids
-    c.delete(ids)
-    ids -= 1
+    global ids, idlist
+    
+    c.delete(idlist.pop())
     exportlines.pop()
+
     print(exportlines, type(exportlines))
-    print(ids)
+    print(ids, idlist)
 
 def deleteall():
     global exportlines

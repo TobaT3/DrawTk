@@ -1,6 +1,7 @@
 from glob import escape
 import tkinter
-from tkinter import BOTTOM, HORIZONTAL, TOP, colorchooser, filedialog, messagebox, font
+from tkinter import BOTTOM, HORIZONTAL, TOP, colorchooser, filedialog, messagebox, font, PhotoImage
+import PIL
 from PIL import ImageGrab
 import pathlib
 import os, sys
@@ -16,11 +17,16 @@ win = tkinter.Tk()
 win.resizable(False, False)
 win.title("TkPaint Canvas")
 
-bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
+bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__))) # i have no idea what this does but it fixed my pyinstaller problems! thanks stack overflow
 
 path_to_ico = os.path.abspath(os.path.join(bundle_dir, 'drawtk.ico'))
+irectangle = PhotoImage(file= os.path.abspath(os.path.join(bundle_dir, 'irectangle.png')))
+ioval = PhotoImage(file=os.path.abspath(os.path.join(bundle_dir, 'ioval.png')))
+iline = PhotoImage(file=os.path.abspath(os.path.join(bundle_dir, 'iline.png')))
+ingon = PhotoImage(file=os.path.abspath(os.path.join(bundle_dir, 'ingon.png')))
+itext = PhotoImage(file=os.path.abspath(os.path.join(bundle_dir, 'itext.png')))
 
-win.iconbitmap(path_to_ico) #couldnt get pyinstaller to package the thing in the exe so i gave up
+win.iconbitmap(path_to_ico) 
 
 c = tkinter.Canvas(win, height=500, width=700, highlightthickness=0,borderwidth=0)
 c.pack()
@@ -120,12 +126,14 @@ def click(e):
     clickc += 1
     pwcoordc += 1
     print("Clicked")
+    
+    c.delete(previewid)
+    c.delete(textid) #sometimes for some reason the deleting screws up, so this is another override
 
     if clickc == 1:
         xc1 = round(x/roundto)*roundto
         yc1 = round(y/roundto)*roundto
         preview = True
-        c.delete(previewid)
     if clickc == 2:
         if mode == "ngon" and getfirstpoint == False:
             xc1 = xc2
@@ -246,10 +254,9 @@ def click(e):
         yc1 = round(y/roundto)*roundto
 
         c.delete(textid)
-        c.create_text(xc1,yc1,text=text, font=font)
+        textid = c.create_text(xc1,yc1,text=text, font=font)
         print(exportlines)
         ids += 1
-        textid = ids
 
     if mode == 'delete': # thanks https://stackoverflow.com/questions/38982313/python-tkinter-identify-object-on-click
         
@@ -269,18 +276,21 @@ def click(e):
 def onKeyPress(event):
     global textid, text, idlist, ids, xc1,xc2, font
     
+    isshift = (event.state & 0x1) != 0 #bool
+
     if mode == "text":
-        if event.keysym != "BackSpace":
-            print("you pressed %s\n" % (event.char))
-            text = text+event.char
-        elif event.keysym == "BackSpace":
+        if event.keysym == "BackSpace":
             print("backspace")
             text = text[:-1]
+        elif not(isshift) and event.keysym == "Return": #Return is keysym for Enter
+            donetext()
+        else:
+            print("you pressed %s\n" % (event.char))
+            text = text+event.char
 
         c.delete(textid)
-        c.create_text(xc1,yc1,text=text, font=font)
+        textid = c.create_text(xc1,yc1,text=text, font=font)
         ids += 1
-        textid = ids
 
 def drawngon():
     global ids, clickcs, fillcolor, linecolor, linethicc, c, linec, idlist,preview, clickc
@@ -290,6 +300,8 @@ def drawngon():
     print("end drawngon")
 def donetext():
     global textid, text, idlist, ids, xc1,xc2, font, exportlines
+
+    print("DONE TEXT")
 
     c.delete(textid)
     c.create_text(xc1,yc1,text=text, font=font)
@@ -316,7 +328,6 @@ def modedelete():
     rectanglebutton.configure(bg="#FFFFFF")
     ovalbutton.configure(bg="#FFFFFF")
     linebutton.configure(bg="#FFFFFF")
-    trianglebutton.configure(bg="#FFFFFF")
     ngonbutton.configure(bg="#FFFFFF")
     textbutton.configure(bg="#FFFFFF")
     delobjbutton.configure(bg="#BDBDBD")
@@ -333,7 +344,6 @@ def moderectangle():
     rectanglebutton.configure(bg="#BDBDBD")
     ovalbutton.configure(bg="#FFFFFF")
     linebutton.configure(bg="#FFFFFF")
-    trianglebutton.configure(bg="#FFFFFF")
     ngonbutton.configure(bg="#FFFFFF")
     textbutton.configure(bg="#FFFFFF")
     delobjbutton.configure(bg="#FFFFFF")
@@ -349,7 +359,6 @@ def modeoval():
     rectanglebutton.configure(bg="#FFFFFF")
     ovalbutton.configure(bg="#BDBDBD")
     linebutton.configure(bg="#FFFFFF")
-    trianglebutton.configure(bg="#FFFFFF")
     ngonbutton.configure(bg="#FFFFFF")
     textbutton.configure(bg="#FFFFFF")
     delobjbutton.configure(bg="#FFFFFF")
@@ -365,7 +374,6 @@ def modeline():
     rectanglebutton.configure(bg="#FFFFFF")
     ovalbutton.configure(bg="#FFFFFF")
     linebutton.configure(bg="#BDBDBD")
-    trianglebutton.configure(bg="#FFFFFF")
     ngonbutton.configure(bg="#FFFFFF")
     textbutton.configure(bg="#FFFFFF")
     delobjbutton.configure(bg="#FFFFFF")
@@ -381,7 +389,6 @@ def modetriangle():
     rectanglebutton.configure(bg="#FFFFFF")
     ovalbutton.configure(bg="#FFFFFF")
     linebutton.configure(bg="#FFFFFF")
-    trianglebutton.configure(bg="#BDBDBD")
     ngonbutton.configure(bg="#FFFFFF")
     textbutton.configure(bg="#FFFFFF")
     delobjbutton.configure(bg="#FFFFFF")
@@ -399,7 +406,6 @@ def modengon():
     rectanglebutton.configure(bg="#FFFFFF")
     ovalbutton.configure(bg="#FFFFFF")
     linebutton.configure(bg="#FFFFFF")
-    trianglebutton.configure(bg="#FFFFFF")
     ngonbutton.configure(bg="#BDBDBD")
     textbutton.configure(bg="#FFFFFF")
     delobjbutton.configure(bg="#FFFFFF")
@@ -412,29 +418,23 @@ def modetext():
     clickc = 0
     mode = "text"
 
-    createtextwindow()
+    #createtextwindow()
+    fontchooser()
 
     print(mode)
     rectanglebutton.configure(bg="#FFFFFF")
     ovalbutton.configure(bg="#FFFFFF")
     linebutton.configure(bg="#FFFFFF")
-    trianglebutton.configure(bg="#FFFFFF")
     ngonbutton.configure(bg="#FFFFFF")
     textbutton.configure(bg='#BDBDBD')
     delobjbutton.configure(bg="#FFFFFF")
 
 def fontchooser():
-    global font, fontbutton
+    global font, toolwindow
 
-    font = tkfontchooser.askfont()
+    font = tkfontchooser.askfont(master=toolwindow, title="Pick a font", text="Text will look like this")
 
     font = tkinter.font.Font(root=None, family=font["family"], size=font["size"], weight=font["weight"], slant=font["slant"], underline=font["underline"], overstrike=font["overstrike"])
-
-    print(font)
-
-    fontstr = font["family"]+" "+str(font["size"])
-
-    fontbutton.configure(text="Change font and size ("+fontstr+")")
 
 def createtextwindow():
     global textwindow, fontbutton, fontstr
@@ -574,10 +574,10 @@ def movetoolwin(e):
 
     toolwindow.geometry(f'{300}x{700}+{x-310}+{y}')
 
-    if mode == "text":
-        x = toolwindow.winfo_x()
-        y = toolwindow.winfo_y()
-        textwindow.geometry(f'{300}x{60}+{x-300}+{y+235}')
+    #if mode == "text":
+        #x = toolwindow.winfo_x()
+        #y = toolwindow.winfo_y()
+        #textwindow.geometry(f'{300}x{60}+{x-300}+{y+235}')
 
 
 win.bind('<Configure>', movetoolwin)
@@ -614,17 +614,15 @@ toolgrid.pack()
 
 
 toollabel = tkinter.Label(toolgrid, text="Tools", font="Roboto 14").grid(row=0, column=0, columnspan=3)
-rectanglebutton = tkinter.Button(toolgrid, text="Rectangle", command=moderectangle, bg="#BDBDBD")
+rectanglebutton = tkinter.Button(toolgrid, image=irectangle, command=moderectangle, bg="#BDBDBD")
 rectanglebutton.grid(row=1, column=0)
-ovalbutton = tkinter.Button(toolgrid, text="Oval", command=modeoval)
+ovalbutton = tkinter.Button(toolgrid, image=ioval, command=modeoval)
 ovalbutton.grid(row=1, column=1)
-linebutton = tkinter.Button(toolgrid, text="Line", command=modeline)
+linebutton = tkinter.Button(toolgrid, image=iline, command=modeline)
 linebutton.grid(row=1, column=2)
-trianglebutton = tkinter.Button(toolgrid, text="Triangle", command=modetriangle)
-trianglebutton.grid(row=2, column=0)
-ngonbutton = tkinter.Button(toolgrid, text="Polygon", command=modengon)
+ngonbutton = tkinter.Button(toolgrid, image=ingon, command=modengon)
 ngonbutton.grid(row=2, column=1)
-textbutton = tkinter.Button(toolgrid, text="Text", command=modetext)
+textbutton = tkinter.Button(toolgrid, image=itext, command=modetext)
 textbutton.grid(row=2, column=2)
 
 colgrid = tkinter.Frame(toolwindow)

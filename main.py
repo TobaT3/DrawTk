@@ -1,17 +1,26 @@
 from glob import escape
 import tkinter
-from tkinter import HORIZONTAL, colorchooser, filedialog, messagebox, font
+from tkinter import BOTTOM, HORIZONTAL, TOP, colorchooser, filedialog, messagebox, font
 from PIL import ImageGrab
 import pathlib
+import os, sys
 import tkfontchooser
 
-#import pyi_splash #doesnt actually import anything; but should be uncommented when building with pyinstaller so the splash screen closes
-#pyi_splash.close()
+try:
+    import pyi_splash
+    pyi_splash.close()
+except:
+    pass #for pyisntaller
 
 win = tkinter.Tk()
 win.resizable(False, False)
 win.title("TkPaint Canvas")
-#win.iconbitmap("drawtk.ico")
+
+bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
+
+path_to_ico = os.path.abspath(os.path.join(bundle_dir, 'drawtk.ico'))
+
+win.iconbitmap(path_to_ico) #couldnt get pyinstaller to package the thing in the exe so i gave up
 
 c = tkinter.Canvas(win, height=500, width=700, highlightthickness=0,borderwidth=0)
 c.pack()
@@ -44,6 +53,10 @@ text = ""
 font = "Helvetica 15"
 fontstr = "Helvetica 15"
 textid = 999999999999
+previewid = None
+previewobj = None
+preview = False
+pwcoordc = 1 #preview coordinate count (eg. xc2,yc2 exist for triangles and stuff)
 
 clickcs = []
 
@@ -54,27 +67,65 @@ linecolor = "#000000"
 isfilltransparent = True
 
 def callback(e):
-    global x,y, poslabel, snapp, roundto
+    global c,x,y, poslabel, snapp, roundto,xc1,yc1,xc2,yc2,previewid,ids,preview, linethicc, isfilltransparent, fillcolor, linecolor, pwcoordc, mode, idlist, previewid, drawingngon, previewobj, clickcs
     
     x = e.x
     y = e.y
 
+    rx = round(x/roundto)*roundto
+    ry = round(y/roundto)*roundto
+
     roundto = snapp.get()
     if roundto == 0:
         roundto=1
+    linethicc = thicc.get()
 
     poslabel.config(text="snapped to "+str(round(x/roundto)*roundto)+"x, "+str(round(y/roundto)*roundto)+"y")
     #print("Pointer is currently at %d, %d" %(x,y))
 
+    if preview == True:
+        ids +=1
+        c.delete(previewobj)
+        previewobj = None
+        if mode == "rectangle":
+            if isfilltransparent == True:
+                previewobj = c.create_rectangle(xc1,yc1,rx,ry, fill="", outline=linecolor, width=linethicc, dash=(5,2))
+            elif isfilltransparent == False:
+                previewobj = c.create_rectangle(xc1,yc1,rx,ry, fill=fillcolor, outline=linecolor, width=linethicc, dash=(5,2))
+        if mode == "oval":
+            if isfilltransparent == True:
+                previewobj = c.create_oval(xc1,yc1,rx,ry, fill="", outline=linecolor, width=linethicc, dash=(5,2))
+            elif isfilltransparent == False:
+                previewobj = c.create_oval(xc1,yc1,rx,ry, fill=fillcolor, outline=linecolor, width=linethicc, dash=(5,2))
+        if mode == "line":
+            previewobj = c.create_line(xc1,yc1,rx,ry, fill=linecolor, width=linethicc, dash=(5,2))
+        if mode == "triangle":
+            if pwcoordc == 1:
+                previewobj = c.create_line(xc1,yc1,rx,ry, fill=linecolor, width=linethicc, dash=(5,2))
+            elif pwcoordc == 2:
+                if isfilltransparent == True:
+                    previewobj = c.create_polygon(xc1,yc1,xc2,yc2,rx,ry, fill="", width = linethicc, outline=linecolor, dash=(5,2))
+                elif isfilltransparent == False:
+                    previewobj = c.create_polygon(xc1,yc1,xc2,yc2,rx,ry, fill=fillcolor, width = linethicc, outline=linecolor, dash=(5,2))
+        if mode == "ngon":
+            if isfilltransparent == True:
+                previewobj = c.create_polygon(clickcs,rx,ry, fill="", width=linethicc, outline=linecolor, dash=(5,2)) #sure it appears closed even if it isnt but a better solution with lines would have been way too complicated
+            elif isfilltransparent == False:
+                previewobj = c.create_polygon(clickcs,rx,ry, fill=fillcolor, width=linethicc, outline=linecolor, dash=(5,2)) #sure it appears closed even if it isnt but a better solution with lines would have been way too complicated
+
+
 def click(e):
-    global xc1,xc2,yc1,yc2,xc3,yc3,clickc,roundto, exportlines, ids, getfirstpoint, clickcs, drawingngon, linethicc, linec, thicc, textid, font, idlist
+    global xc1,xc2,yc1,yc2,xc3,yc3,clickc,roundto, exportlines, ids, getfirstpoint, clickcs, drawingngon, linethicc, linec, thicc, textid, font, idlist, preview, pwcoordc,previewid
     
     clickc += 1
+    pwcoordc += 1
     print("Clicked")
 
     if clickc == 1:
         xc1 = round(x/roundto)*roundto
         yc1 = round(y/roundto)*roundto
+        preview = True
+        c.delete(previewid)
     if clickc == 2:
         if mode == "ngon" and getfirstpoint == False:
             xc1 = xc2
@@ -84,43 +135,48 @@ def click(e):
         yc2 = round(y/roundto)*roundto
         
         if mode=="triangle":
-            
             escape
         elif mode =="ngon":
             clickc = 1
         else:
             clickc = 0
+            preview = False
+            pwcoordc = 0
+            
 
-        linethicc = thicc.get()
         if mode == "rectangle":
             print(fillcolor, isfilltransparent)
             if isfilltransparent == True:
                 ids += 1
                 idlist.append(ids)
+                c.delete(previewobj)
                 c.create_rectangle(xc1,yc1,xc2,yc2, fill="", outline=linecolor, width=linethicc)
                 exportlines.append("c.create_rectangle("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", width="+str(linethicc)+",fill='', outline='"+linecolor+"')")
             elif isfilltransparent == False:
                 ids += 1
                 idlist.append(ids)
+                c.delete(previewobj)
                 c.create_rectangle(xc1,yc1,xc2,yc2, fill=fillcolor, outline=linecolor, width=linethicc)
                 exportlines.append("c.create_rectangle("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", width="+str(linethicc)+",fill='"+fillcolor+"', outline='"+linecolor+"')")
         if mode == "oval":
             if isfilltransparent == True:
                 ids += 1
                 idlist.append(ids)
+                c.delete(previewobj)
                 c.create_oval(xc1,yc1,xc2,yc2, fill="", outline=linecolor, width=linethicc)
                 exportlines.append("c.create_oval("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", width="+str(linethicc)+",fill='', outline='"+linecolor+"')")
             elif isfilltransparent == False:
                 ids += 1
                 idlist.append(ids)
+                c.delete(previewobj)
                 c.create_oval(xc1,yc1,xc2,yc2, fill=fillcolor, outline=linecolor, width=linethicc)
                 exportlines.append("c.create_oval("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", width="+str(linethicc)+",fill='"+fillcolor+"', outline='"+linecolor+"')")
         if mode == "line":
             ids += 1
             idlist.append(ids)
+            c.delete(previewobj)
             c.create_line(xc1,yc1,xc2,yc2, fill=linecolor, width=linethicc)
             exportlines.append("c.create_line("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", width="+str(linethicc)+", fill='"+linecolor+"')")
-        print(exportlines)
 
             
 
@@ -129,7 +185,11 @@ def click(e):
         if mode == "triangle":
             ids += 1
             idlist.append(ids)
+            c.delete(previewobj)
             clickc=0
+            preview = False
+            pwcoordc = 0
+
             xc3 = round(x/roundto)*roundto
             yc3 = round(y/roundto)*roundto
 
@@ -141,10 +201,45 @@ def click(e):
                 exportlines.append("c.create_polygon("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+","+str(xc3)+","+str(yc3)+", fill='"+fillcolor+"',outline='"+linecolor+"', width="+str(linethicc)+")")
     
     if mode == 'ngon':
-        clickcs.append(round(x/roundto)*roundto)
-        clickcs.append(round(y/roundto)*roundto)
-        
-        print(clickcs)
+
+        rx = round(x/roundto)*roundto
+        ry = round(y/roundto)*roundto
+
+        if len(clickcs) >> 2: #to avoid an IndexError; could have done a try except but whatever
+            print(clickcs[0], clickcs[1])
+            print(x, y)
+            if clickcs[0] == rx and clickcs[1] == ry:
+                print("drawngon")
+
+                ids += 1
+                idlist.append(ids)
+
+                if isfilltransparent == True:
+                    test = c.create_polygon(clickcs, fill="", outline= linecolor, width=linethicc)
+                    print(test)
+                    exportlines.append("c.create_polygon("+str(clickcs)+", fill='', outline='"+linecolor+"', width="+str(linethicc)+")")
+                elif isfilltransparent == False:
+                    c.create_polygon(clickcs, fill=fillcolor, outline= linecolor, width=linethicc)
+                    exportlines.append("c.create_polygon("+str(clickcs)+", fill='"+fillcolor+"', outline='"+linecolor+"', width="+str(linethicc)+")")
+
+                c.delete(previewobj)
+
+                preview = False
+                pwcoordc = 0
+                
+                print("still drawngon")
+
+                del clickcs [:]
+                clickc = 0
+                linec = 0
+            else:
+                clickcs.append(rx)
+                clickcs.append(ry)
+        else:
+            print("error", clickcs)
+            clickcs.append(rx)
+            clickcs.append(ry)
+
     
     if mode == 'text':
         xc1 = round(x/roundto)*roundto
@@ -159,7 +254,7 @@ def click(e):
     if mode == 'delete': # thanks https://stackoverflow.com/questions/38982313/python-tkinter-identify-object-on-click
         
         delid = (c.find_closest(e.x, e.y)[0])
-        if len(exportlines) != 0: 
+        if len(exportlines) > 1:
             exportlines.pop(delid-1)
         
         
@@ -188,33 +283,11 @@ def onKeyPress(event):
         textid = ids
 
 def drawngon():
-    global ids, clickcs, fillcolor, linecolor, linethicc, c, linec, idlist
-    
-    print("drawngon")
-
-    
-    linethicc = thicc.get()
-    ids += 1
-    idlist.append(ids)
-
-    if isfilltransparent == True:
-        test = c.create_polygon(clickcs, fill="", outline= linecolor, width=linethicc)
-        print(test)
-        exportlines.append("c.create_polygon("+str(clickcs)+", fill='', outline='"+linecolor+"', width="+str(linethicc)+")")
-    elif isfilltransparent == False:
-        c.create_polygon(clickcs, fill=fillcolor, outline= linecolor, width=linethicc)
-        exportlines.append("c.create_polygon("+str(clickcs)+", fill='"+fillcolor+"', outline='"+linecolor+"', width="+str(linethicc)+")")
-    
-    print("still drawngon")
-
-    del clickcs [:]
-
-    linec = 0
-    
+    global ids, clickcs, fillcolor, linecolor, linethicc, c, linec, idlist,preview, clickc
 
     print("CLEARED clickcs", clickcs)
     
-    print("end drawngon")    
+    print("end drawngon")
 def donetext():
     global textid, text, idlist, ids, xc1,xc2, font, exportlines
 
@@ -223,6 +296,7 @@ def donetext():
     exportlines.append("c.create_text("+str(xc1)+','+str(yc1)+", text='"+text+"', font='"+str(font)+"')")
     ids += 1
     idlist.append(ids)
+    preview = False
     textid = 999999
     text = ""
 
@@ -321,14 +395,6 @@ def modengon():
     getfirstpoint = True
     mode = "ngon"
 
-    if drawingngon == False:
-        drawingngon = True
-        ngonbutton.configure(text="Polygon (click again to stop drawing)")
-    elif drawingngon == True:
-        ngonbutton.configure(text="Polygon (click to start drawing again)")
-        drawingngon = False
-        drawngon()
-
     print(mode)
     rectanglebutton.configure(bg="#FFFFFF")
     ovalbutton.configure(bg="#FFFFFF")
@@ -414,12 +480,12 @@ def togglefilltransparent():
         isfilltransparent = False
 
         filltransparentbut.configure(bg="#FFFFFF")
-        filltransparentbut.config(text="Toggle Fill Transparent (False)")
+        filltransparentbut.config(text="Fill Transparent (F)")
     else:
         isfilltransparent = True
 
         filltransparentbut.configure(bg="#BDBDBD")
-        filltransparentbut.config(text="Toggle Fill Transparent (True)")
+        filltransparentbut.config(text="Fill Transparent (T)")
 
 def load():
     global ids, idlist, exportlines
@@ -473,9 +539,10 @@ def exportpng():
 #generate()
 
 def undo():
-    global ids, idlist
+    global ids, idlist, exportlines, c
     
-    c.delete(idlist.pop())
+    c.delete(idlist[len(idlist)-1])
+    idlist.pop()
     exportlines.pop()
 
     print(exportlines, type(exportlines))
@@ -517,58 +584,74 @@ win.bind('<Configure>', movetoolwin)
 
 #lbl = tkinter.Label(toolwindow, text="I am in this toolwindow thing right").pack()
 
+menu = tkinter.Menu(toolwindow)
+toolwindow.configure(menu=menu)
+
+filemenu = tkinter.Menu(menu)
+filemenu.add_command(label="Load", command=load)
+filemenu.add_separator()
+filemenu.add_command(label="Save/Export to .py", command=exportpy)
+filemenu.add_command(label="Export image", command=exportpng)
+menu.add_cascade(label="File", menu=filemenu)
+
+editmenu = tkinter.Menu(menu)
+editmenu.add_command(label="Clear Canvas", command=deleteall)
+menu.add_cascade(label="Edit", menu=editmenu)
 
 poslabel = tkinter.Label(toolwindow, text="", font="Roboto 14")
-poslabel.pack(pady=10)
+poslabel.pack()
 
-undobutton = tkinter.Button(toolwindow, text="Undo", command=undo, bg="light green").pack()
-delobjbutton = tkinter.Button(toolwindow, text="Delete object", command=modedelete, bg="#FFFFFF")
-delobjbutton.pack(pady=5)
+topgrid = tkinter.Frame(toolwindow)
+topgrid.pack()
 
-toollabel = tkinter.Label(toolwindow, text="Tools", font="Roboto 14").pack()
-rectanglebutton = tkinter.Button(toolwindow, text="Rectangle", command=moderectangle, bg="#BDBDBD")
-rectanglebutton.pack()
-ovalbutton = tkinter.Button(toolwindow, text="Oval", command=modeoval)
-ovalbutton.pack()
-linebutton = tkinter.Button(toolwindow, text="Line (uses OUTLINE color not FILL COLOR", command=modeline)
-linebutton.pack()
-trianglebutton = tkinter.Button(toolwindow, text="Triangle", command=modetriangle)
-trianglebutton.pack()
-ngonbutton = tkinter.Button(toolwindow, text="Polygon (click to start drawing)", command=modengon)
-ngonbutton.pack()
-textbutton = tkinter.Button(toolwindow, text="Text", command=modetext)
-textbutton.pack()
+undobutton = tkinter.Button(topgrid, text="Undo", command=undo, bg="light green").grid(row=1,column=0)
+delobjbutton = tkinter.Button(topgrid, text="Delete object", command=modedelete, bg="#FFFFFF")
+delobjbutton.grid(row=1, column=1)
 
-collabel = tkinter.Label(toolwindow, text="Colors and thickness", font="Roboto 14").pack()
-colpickbut = tkinter.Button(toolwindow, text="Fill Color", command=opencolorpick, bg=fillcolor)
-colpickbut.pack()
 
-filltransparentbut = tkinter.Button(toolwindow, text="Toggle Fill Transparent (True)", command=togglefilltransparent, bg=("#BDBDBD"))
-filltransparentbut.pack()
+toolgrid = tkinter.Frame(toolwindow)
+toolgrid.pack()
 
-colpickbut2 = tkinter.Button(toolwindow, text="Line Color", command=opencolorpick2, bg=linecolor)
-colpickbut2.pack()
 
-thicc = tkinter.Scale(toolwindow, from_=1, to=75, orient=HORIZONTAL, tickinterval=10, length=200, label="Line Width", resolution=5)
-thicc.pack()
+toollabel = tkinter.Label(toolgrid, text="Tools", font="Roboto 14").grid(row=0, column=0, columnspan=3)
+rectanglebutton = tkinter.Button(toolgrid, text="Rectangle", command=moderectangle, bg="#BDBDBD")
+rectanglebutton.grid(row=1, column=0)
+ovalbutton = tkinter.Button(toolgrid, text="Oval", command=modeoval)
+ovalbutton.grid(row=1, column=1)
+linebutton = tkinter.Button(toolgrid, text="Line", command=modeline)
+linebutton.grid(row=1, column=2)
+trianglebutton = tkinter.Button(toolgrid, text="Triangle", command=modetriangle)
+trianglebutton.grid(row=2, column=0)
+ngonbutton = tkinter.Button(toolgrid, text="Polygon", command=modengon)
+ngonbutton.grid(row=2, column=1)
+textbutton = tkinter.Button(toolgrid, text="Text", command=modetext)
+textbutton.grid(row=2, column=2)
 
-deletebut = tkinter.Button(toolwindow, text="Load", command=load).pack()
+colgrid = tkinter.Frame(toolwindow)
+colgrid.pack()
 
-setlabel = tkinter.Label(toolwindow, text="Other", font="Roboto 14").pack()
+collabel = tkinter.Label(colgrid, text="Colors and thickness", font="Roboto 14").grid(row=0,column=0,columnspan=3)
+colpickbut = tkinter.Button(colgrid, text="Fill Color", command=opencolorpick, bg=fillcolor)
+colpickbut.grid(row=1, column=0)
 
-snapp = tkinter.Scale(toolwindow, from_=0, to=300, orient=HORIZONTAL, length=200, label="Snapping to every (0 to turn off)", resolution=5)
-snapp.pack()
+filltransparentbut = tkinter.Button(colgrid, text="Fill Transparent (T)", command=togglefilltransparent, bg=("#BDBDBD"))
+filltransparentbut.grid(row=1, column=1)
+
+colpickbut2 = tkinter.Button(colgrid, text="Line Color", command=opencolorpick2, bg=linecolor, fg="white")
+colpickbut2.grid(row=1, column=2)
+
+thicc = tkinter.Scale(colgrid, from_=1, to=75, orient=HORIZONTAL, tickinterval=10, length=200, label="Line Width", resolution=5)
+thicc.grid(row=2,column=0,columnspan=3)
+
+snapp = tkinter.Scale(colgrid, from_=0, to=200, orient=HORIZONTAL, length=200, label="Snapping (0 to turn off)", resolution=5)
+snapp.grid(row=3,column=0,columnspan=3)
 snapp.set(roundto)
 
+#selobjframe = tkinter.Frame(toolwindow)
+#selobjframe.pack()
 
-explabel = tkinter.Label(toolwindow, text="Save and Export", font="Roboto 14").pack()
-#warnlabel2 = tkinter.Label(toolwindow, text="WARNING: Will overwrite previously generated files", fg="red").pack()
-#warnlabel3 = tkinter.Label(toolwindow, text="Copy the tkinter_drawing files somewhere else \n if you dont want to lose them", fg="red").pack()
-exportbut = tkinter.Button(toolwindow, text="Save - export to .py", command=exportpy).pack()
-imgbut = tkinter.Button(toolwindow, text="export to image", command=exportpng).pack()
-
-warnlabel = tkinter.Label(toolwindow, text="WARNING: Will delete everything", fg="red").pack()
-deletebut = tkinter.Button(toolwindow, text="CLEAR CANVAS", command=deleteall, bg="red").pack()
+#selobjname = tkinter.Label(selobjframe, text="Select object to edit it")
+#selobjname.pack()
 
 melabel = tkinter.Label(toolwindow, text="Made by TobaT3", font="Roboto 8").pack()
 

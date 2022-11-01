@@ -524,18 +524,10 @@ def exportpy():
 
 def exportpng():
     #Thanks to B.Jenkins on stack overflow for https://stackoverflow.com/a/38645917/15888488 (yes its like 6 years old but it still works)
-    # x=win.winfo_rootx()+c.winfo_x()
-    # y=win.winfo_rooty()+c.winfo_y()
-    # x1=x+c.winfo_width()
-    # y1=y+c.winfo_height()
-    
-    # filename = filedialog.asksaveasfilename(initialdir = pathlib.Path(__file__).parent.resolve(), title = "Select an image file to export to", filetypes=[("PNG", ".png"), ("JPEG", ".jpeg"), ("TIFF", ".tiff"), ("BMP", ".bmp")], defaultextension=".png")
-    # ImageGrab.grab().crop((x,y,x1,y1)).save(filename)
-
-    x=toolwindow.winfo_rootx()+c.winfo_x()
-    y=toolwindow.winfo_rooty()+c.winfo_y()-50
-    x1=x+toolwindow.winfo_width()
-    y1=y+toolwindow.winfo_height()
+    x=win.winfo_rootx()+c.winfo_x()
+    y=win.winfo_rooty()+c.winfo_y()
+    x1=x+c.winfo_width()
+    y1=y+c.winfo_height()
     
     filename = filedialog.asksaveasfilename(initialdir = pathlib.Path(__file__).parent.resolve(), title = "Select an image file to export to", filetypes=[("PNG", ".png"), ("JPEG", ".jpeg"), ("TIFF", ".tiff"), ("BMP", ".bmp")], defaultextension=".png")
     ImageGrab.grab().crop((x,y,x1,y1)).save(filename)

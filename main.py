@@ -1,7 +1,6 @@
 from glob import escape
 import tkinter
-from tkinter import BOTTOM, HORIZONTAL, TOP, colorchooser, filedialog, messagebox, font, PhotoImage
-import PIL
+from tkinter import HORIZONTAL, colorchooser, filedialog, messagebox, font, PhotoImage
 from PIL import ImageGrab
 import pathlib
 import os, sys
@@ -63,10 +62,9 @@ previewid = None
 previewobj = None
 preview = False
 pwcoordc = 1 #preview coordinate count (eg. xc2,yc2 exist for triangles and stuff)
-
 clickcs = []
-
 exportlines = []
+exportobjdict = {} #a dictionary which contains the object ids of objects that will be exported with their corresponding id in the exportlines list.
 
 fillcolor = "#FFFFFF"
 linecolor = "#000000"
@@ -155,36 +153,27 @@ def click(e):
         if mode == "rectangle":
             print(fillcolor, isfilltransparent)
             if isfilltransparent == True:
-                ids += 1
-                idlist.append(ids)
-                c.delete(previewobj)
                 c.create_rectangle(xc1,yc1,xc2,yc2, fill="", outline=linecolor, width=linethicc)
                 exportlines.append("c.create_rectangle("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", width="+str(linethicc)+",fill='', outline='"+linecolor+"')")
             elif isfilltransparent == False:
-                ids += 1
-                idlist.append(ids)
-                c.delete(previewobj)
                 c.create_rectangle(xc1,yc1,xc2,yc2, fill=fillcolor, outline=linecolor, width=linethicc)
                 exportlines.append("c.create_rectangle("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", width="+str(linethicc)+",fill='"+fillcolor+"', outline='"+linecolor+"')")
         if mode == "oval":
             if isfilltransparent == True:
-                ids += 1
-                idlist.append(ids)
-                c.delete(previewobj)
                 c.create_oval(xc1,yc1,xc2,yc2, fill="", outline=linecolor, width=linethicc)
                 exportlines.append("c.create_oval("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", width="+str(linethicc)+",fill='', outline='"+linecolor+"')")
             elif isfilltransparent == False:
-                ids += 1
-                idlist.append(ids)
-                c.delete(previewobj)
                 c.create_oval(xc1,yc1,xc2,yc2, fill=fillcolor, outline=linecolor, width=linethicc)
                 exportlines.append("c.create_oval("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", width="+str(linethicc)+",fill='"+fillcolor+"', outline='"+linecolor+"')")
         if mode == "line":
-            ids += 1
-            idlist.append(ids)
-            c.delete(previewobj)
+
             c.create_line(xc1,yc1,xc2,yc2, fill=linecolor, width=linethicc)
             exportlines.append("c.create_line("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+", width="+str(linethicc)+", fill='"+linecolor+"')")
+        
+        ids += 1
+        idlist.append(ids)
+        c.delete(previewobj)
+        exportobjdict.update({ids: len(exportlines)})
 
             
 
@@ -207,6 +196,8 @@ def click(e):
             elif isfilltransparent == False:
                 c.create_polygon(xc1,yc1,xc2,yc2,xc3,yc3, fill=fillcolor, outline=linecolor, width=linethicc)
                 exportlines.append("c.create_polygon("+str(xc1)+","+str(yc1)+","+str(xc2)+","+str(yc2)+","+str(xc3)+","+str(yc3)+", fill='"+fillcolor+"',outline='"+linecolor+"', width="+str(linethicc)+")")
+            
+            exportobjdict.update({ids: len(exportlines)})
     
     if mode == 'ngon':
 
@@ -231,6 +222,7 @@ def click(e):
                     exportlines.append("c.create_polygon("+str(clickcs)+", fill='"+fillcolor+"', outline='"+linecolor+"', width="+str(linethicc)+")")
 
                 c.delete(previewobj)
+                exportobjdict.update({ids: len(exportlines)})
 
                 preview = False
                 pwcoordc = 0
@@ -261,8 +253,10 @@ def click(e):
     if mode == 'delete': # thanks https://stackoverflow.com/questions/38982313/python-tkinter-identify-object-on-click
         
         delid = (c.find_closest(e.x, e.y)[0])
+        print(exportlines, delid)
         if len(exportlines) > 1:
-            exportlines.pop(delid-1)
+            popinexportlines = exportobjdict[delid]
+            exportlines.pop(popinexportlines)
         
         
         c.delete(delid)
@@ -292,6 +286,8 @@ def onKeyPress(event):
         textid = c.create_text(xc1,yc1,text=text, font=font)
         ids += 1
 
+        
+
 def drawngon():
     global ids, clickcs, fillcolor, linecolor, linethicc, c, linec, idlist,preview, clickc
 
@@ -311,6 +307,7 @@ def donetext():
     preview = False
     textid = 999999
     text = ""
+    exportobjdict.update({ids: len(exportlines)})
 
 
 
@@ -527,10 +524,18 @@ def exportpy():
 
 def exportpng():
     #Thanks to B.Jenkins on stack overflow for https://stackoverflow.com/a/38645917/15888488 (yes its like 6 years old but it still works)
-    x=win.winfo_rootx()+c.winfo_x()
-    y=win.winfo_rooty()+c.winfo_y()
-    x1=x+c.winfo_width()
-    y1=y+c.winfo_height()
+    # x=win.winfo_rootx()+c.winfo_x()
+    # y=win.winfo_rooty()+c.winfo_y()
+    # x1=x+c.winfo_width()
+    # y1=y+c.winfo_height()
+    
+    # filename = filedialog.asksaveasfilename(initialdir = pathlib.Path(__file__).parent.resolve(), title = "Select an image file to export to", filetypes=[("PNG", ".png"), ("JPEG", ".jpeg"), ("TIFF", ".tiff"), ("BMP", ".bmp")], defaultextension=".png")
+    # ImageGrab.grab().crop((x,y,x1,y1)).save(filename)
+
+    x=toolwindow.winfo_rootx()+c.winfo_x()
+    y=toolwindow.winfo_rooty()+c.winfo_y()-50
+    x1=x+toolwindow.winfo_width()
+    y1=y+toolwindow.winfo_height()
     
     filename = filedialog.asksaveasfilename(initialdir = pathlib.Path(__file__).parent.resolve(), title = "Select an image file to export to", filetypes=[("PNG", ".png"), ("JPEG", ".jpeg"), ("TIFF", ".tiff"), ("BMP", ".bmp")], defaultextension=".png")
     ImageGrab.grab().crop((x,y,x1,y1)).save(filename)
@@ -551,33 +556,29 @@ def undo():
 def deleteall():
     global exportlines
 
-    if messagebox.askokcancel("Are you sure?", "This will delete your canvas for ever (a long time)", icon = 'warning') == False:
+    if messagebox.askokcancel("Are you sure?", "This will delete your canvas forever (a long time)", icon = 'warning') == False:
         print("cancelled deleteall")
     else:
         c.delete("all")
         exportlines.clear()
 
 toolwindow = tkinter.Toplevel(win)
-toolwindow.geometry("300x700")
 toolwindow.title("Toolbox")
 toolwindow.resizable(False, False)
+toolwindow.iconbitmap(path_to_ico) 
 
 screen_width = toolwindow.winfo_screenwidth()
 screen_height = toolwindow.winfo_screenheight()
 center_x = int(screen_width/2 - 700 / 2)
 center_y = int(screen_height/2 - 500 / 2)
-toolwindow.geometry(f'{300}x{700}+{center_x-310}+{center_y}')
+toolwindow.geometry(f'{300}x{480}+{center_x-310}+{center_y}')
 
 def movetoolwin(e):
     x = win.winfo_x()
     y = win.winfo_y()
 
-    toolwindow.geometry(f'{300}x{700}+{x-310}+{y}')
+    toolwindow.geometry(f'{300}x{480}+{x-310}+{y}')
 
-    #if mode == "text":
-        #x = toolwindow.winfo_x()
-        #y = toolwindow.winfo_y()
-        #textwindow.geometry(f'{300}x{60}+{x-300}+{y+235}')
 
 
 win.bind('<Configure>', movetoolwin)

@@ -513,14 +513,14 @@ def exportpy():
     #fp = open(filename, 'w')
     fp.write('#If you want to load this file make sure lines 1-6 are not modified\n')
     fp.write('\nimport tkinter')
-    fp.write('\nc = tkinter.Canvas(height=500, width=700)')
+    fp.write(f'\nc = tkinter.Canvas(height={CANVAS_HEIGHT}, width={CANVAS_WIDTH})')
     fp.write('\nc.pack()\n')
     
     for x in exportlines:
         print(x)
         fp.write('\n'+x)
     
-    fp.write("\ntkinter.mainloop()")
+    fp.write("\ntkinter.mainloop()") #tkinter.mainloop() istecnhically not needed, but if it is excluded the generated file doesnt run in vscode only via IDLE so i just keep it
     fp.write("\n#Made in DrawTk by TobaT3")
 
     fp.close()

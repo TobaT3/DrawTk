@@ -1,6 +1,7 @@
 from glob import escape
 import tkinter
-from tkinter import HORIZONTAL, colorchooser, filedialog, messagebox, font, PhotoImage
+from tkinter import BOTTOM, HORIZONTAL, TOP, colorchooser, filedialog, messagebox, font, PhotoImage, simpledialog
+import PIL
 from PIL import ImageGrab
 import pathlib
 import os, sys
@@ -11,6 +12,10 @@ try:
     pyi_splash.close()
 except:
     pass #for pyisntaller
+
+CANVAS_HEIGHT = 500
+CANVAS_WIDTH = 700
+
 
 win = tkinter.Tk()
 win.resizable(False, False)
@@ -27,14 +32,14 @@ itext = PhotoImage(file=os.path.abspath(os.path.join(bundle_dir, 'itext.png')))
 
 win.iconbitmap(path_to_ico) 
 
-c = tkinter.Canvas(win, height=500, width=700, highlightthickness=0,borderwidth=0)
+c = tkinter.Canvas(win, height=CANVAS_HEIGHT, width=CANVAS_WIDTH, highlightthickness=0,borderwidth=0)
 c.pack()
 
 screen_width = win.winfo_screenwidth()
 screen_height = win.winfo_screenheight()
-center_x = int(screen_width/2 - 700 / 2)
-center_y = int(screen_height/2 - 500 / 2)
-win.geometry(f'{700}x{500}+{center_x}+{center_y}')
+center_x = int(screen_width/2 - CANVAS_WIDTH / 2)
+center_y = int(screen_height/2 - CANVAS_HEIGHT / 2)
+win.geometry(f'{CANVAS_WIDTH}x{CANVAS_HEIGHT}+{center_x}+{center_y}')
 
 
 mode = "rectangle"
@@ -559,18 +564,25 @@ toolwindow.title("Toolbox")
 toolwindow.resizable(False, False)
 toolwindow.iconbitmap(path_to_ico) 
 
-screen_width = toolwindow.winfo_screenwidth()
-screen_height = toolwindow.winfo_screenheight()
-center_x = int(screen_width/2 - 700 / 2)
-center_y = int(screen_height/2 - 500 / 2)
-toolwindow.geometry(f'{300}x{480}+{center_x-310}+{center_y}')
-
 def movetoolwin(e):
     x = win.winfo_x()
     y = win.winfo_y()
 
     toolwindow.geometry(f'{300}x{480}+{x-310}+{y}')
 
+
+def canvaswidth():
+    CANVAS_WIDTH = tkinter.simpledialog.askinteger("Change Canvas Size", "Enter Canvas WIDTH")
+    CANVAS_HEIGHT = tkinter.simpledialog.askinteger("Change Canvas Size", "Enter Canvas HEIGHT")
+
+
+    screen_width = win.winfo_screenwidth()
+    screen_height = win.winfo_screenheight()
+    center_x = int(screen_width/2 - CANVAS_WIDTH / 2)
+    center_y = int(screen_height/2 - CANVAS_HEIGHT / 2)
+    win.geometry(f'{CANVAS_WIDTH}x{CANVAS_HEIGHT}+{center_x}+{center_y}')
+
+    movetoolwin(e=0)
 
 
 win.bind('<Configure>', movetoolwin)
@@ -589,6 +601,8 @@ menu.add_cascade(label="File", menu=filemenu)
 
 editmenu = tkinter.Menu(menu)
 editmenu.add_command(label="Clear Canvas", command=deleteall)
+editmenu.add_separator()
+editmenu.add_command(label="Change Canvas Size", command=canvaswidth)
 menu.add_cascade(label="Edit", menu=editmenu)
 
 poslabel = tkinter.Label(toolwindow, text="", font="Roboto 14")

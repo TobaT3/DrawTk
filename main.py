@@ -1,8 +1,9 @@
+import glob
 from glob import escape
 import tkinter
 from tkinter import BOTTOM, HORIZONTAL, TOP, colorchooser, filedialog, messagebox, font, PhotoImage, simpledialog
 import PIL
-from PIL import ImageGrab
+from PIL import ImageGrab, Image
 import pathlib
 import os, sys
 import tkfontchooser
@@ -41,7 +42,7 @@ center_x = int(screen_width/2 - CANVAS_WIDTH / 2)
 center_y = int(screen_height/2 - CANVAS_HEIGHT / 2)
 win.geometry(f'{CANVAS_WIDTH}x{CANVAS_HEIGHT}+{center_x}+{center_y}')
 
-
+#deafult values
 mode = "rectangle"
 x = 0
 y = 0
@@ -75,7 +76,12 @@ fillcolor = "#FFFFFF"
 linecolor = "#000000"
 isfilltransparent = True
 
-def callback(e):
+#animation variables deafult values:
+isanimation = False
+animationfolder = None
+frame = 0
+
+def callback(e): # mouse movement
     global c,x,y, poslabel, snapp, roundto,xc1,yc1,xc2,yc2,previewid,ids,preview, linethicc, isfilltransparent, fillcolor, linecolor, pwcoordc, mode, idlist, previewid, drawingngon, previewobj, clickcs
     
     x = e.x
@@ -129,6 +135,7 @@ def click(e):
     clickc += 1
     pwcoordc += 1
     print("Clicked")
+    print(exportlines)
     
     c.delete(previewid)
     c.delete(textid) #sometimes for some reason the deleting screws up, so this is another override
@@ -331,7 +338,7 @@ def modedelete():
     ovalbutton.configure(bg="#FFFFFF")
     linebutton.configure(bg="#FFFFFF")
     ngonbutton.configure(bg="#FFFFFF")
-    textbutton.configure(bg="#FFFFFF")
+    # textbutton.configure(bg="#FFFFFF")
     delobjbutton.configure(bg="#BDBDBD")
 
     if mode=="text":
@@ -347,7 +354,7 @@ def moderectangle():
     ovalbutton.configure(bg="#FFFFFF")
     linebutton.configure(bg="#FFFFFF")
     ngonbutton.configure(bg="#FFFFFF")
-    textbutton.configure(bg="#FFFFFF")
+    # textbutton.configure(bg="#FFFFFF")
     delobjbutton.configure(bg="#FFFFFF")
 
     if mode=="text":
@@ -362,7 +369,7 @@ def modeoval():
     ovalbutton.configure(bg="#BDBDBD")
     linebutton.configure(bg="#FFFFFF")
     ngonbutton.configure(bg="#FFFFFF")
-    textbutton.configure(bg="#FFFFFF")
+    # textbutton.configure(bg="#FFFFFF")
     delobjbutton.configure(bg="#FFFFFF")
 
     if mode=="text":
@@ -377,7 +384,7 @@ def modeline():
     ovalbutton.configure(bg="#FFFFFF")
     linebutton.configure(bg="#BDBDBD")
     ngonbutton.configure(bg="#FFFFFF")
-    textbutton.configure(bg="#FFFFFF")
+    # textbutton.configure(bg="#FFFFFF")
     delobjbutton.configure(bg="#FFFFFF")
 
     if mode=="text":
@@ -392,7 +399,7 @@ def modetriangle():
     ovalbutton.configure(bg="#FFFFFF")
     linebutton.configure(bg="#FFFFFF")
     ngonbutton.configure(bg="#FFFFFF")
-    textbutton.configure(bg="#FFFFFF")
+    # textbutton.configure(bg="#FFFFFF")
     delobjbutton.configure(bg="#FFFFFF")
 
     if mode=="text":
@@ -409,7 +416,7 @@ def modengon():
     ovalbutton.configure(bg="#FFFFFF")
     linebutton.configure(bg="#FFFFFF")
     ngonbutton.configure(bg="#BDBDBD")
-    textbutton.configure(bg="#FFFFFF")
+    # textbutton.configure(bg="#FFFFFF")
     delobjbutton.configure(bg="#FFFFFF")
 
     if mode=="text":
@@ -428,7 +435,7 @@ def modetext():
     ovalbutton.configure(bg="#FFFFFF")
     linebutton.configure(bg="#FFFFFF")
     ngonbutton.configure(bg="#FFFFFF")
-    textbutton.configure(bg='#BDBDBD')
+    # textbutton.configure(bg='#BDBDBD')
     delobjbutton.configure(bg="#FFFFFF")
 
 def fontchooser():
@@ -504,12 +511,15 @@ def load():
             exportlines.append(x)
             ids += 1
             idlist.append(ids)
+    
+    fp.close()
 
 def exportpy():
 
     fp = filedialog.asksaveasfile(initialdir = pathlib.Path(__file__).parent.resolve(), title = "Select a .py file to export to", filetypes=[("Python file", ".py")], defaultextension=".py")
 
     print('generating')
+    #filename = "test.py"
     #fp = open(filename, 'w')
     fp.write('#If you want to load this file make sure lines 1-6 are not modified\n')
     fp.write('\nimport tkinter')
@@ -537,6 +547,23 @@ def exportpng():
     filename = filedialog.asksaveasfilename(initialdir = pathlib.Path(__file__).parent.resolve(), title = "Select an image file to export to", filetypes=[("PNG", ".png"), ("JPEG", ".jpeg"), ("TIFF", ".tiff"), ("BMP", ".bmp")], defaultextension=".png")
     ImageGrab.grab().crop((x,y,x1,y1)).save(filename)
 
+
+def exportgif():
+    global animationfolder
+
+    if animationfolder == None:
+        animationfolder = filedialog.askdirectory(initialdir=pathlib.Path(__file__).parent.resolve(), title="Select folder with images")
+    expgifname = filedialog.asksaveasfilename(initialdir = pathlib.Path(__file__).parent.resolve(), title = "", filetypes=[("GIF", ".gif")], defaultextension=".gif")
+    giffiles = []
+
+    msperframe = 100 #will be modifiable global setting but for now setting it here
+
+    frames = [Image.open(image) for image in glob.glob(f"{animationfolder}/*.PNG")] #FINALLY A SOLUTION THAT WORKED https://www.blog.pythonlibrary.org/2021/06/23/creating-an-animated-gif-with-python/ i love plagiarism
+    frame_one = frames[0]
+    frame_one.save(expgifname, format="GIF", append_images=frames,
+               save_all=True, duration=msperframe, loop=0)
+
+        
 
 #generate()
 
@@ -584,6 +611,114 @@ def canvaswidth():
 
     movetoolwin(e=0)
 
+def initanimation():
+    global animationfolder,frame
+
+    
+    animationfolder = filedialog.askdirectory(initialdir=pathlib.Path(__file__).parent.resolve(), title="Select where to store the animation frames")
+
+    isanimationmodelabel.configure(text="Animation folder: \n"+animationfolder)
+    
+    frame = 0
+    loadframe(0)
+    
+
+    
+def unloadframe(frame):
+    global exportlines
+
+    if animationfolder == None:
+        print("animationfolder == None")
+        return
+        
+
+    if exportlines == []:
+        return
+
+    #runs a slightly modified version of exportpy and exportpng(). sure its gonna make things harder LATER, but its easier NOW
+
+
+    print("cleared screen, on to writing")
+
+    filename = f"{animationfolder}\{frame}.py"
+
+    fp = open(filename, 'w')
+    fp.write('#DrawTk Animation frame\n')
+    fp.write('\nimport tkinter')
+    fp.write(f'\nc = tkinter.Canvas(height={CANVAS_HEIGHT}, width={CANVAS_WIDTH})')
+    fp.write('\nc.pack()\n')
+    
+    for x in exportlines:
+        print(x)
+        fp.write('\n'+x)
+
+    fp.close()
+
+    x=win.winfo_rootx()+c.winfo_x()
+    y=win.winfo_rooty()+c.winfo_y()
+    x1=x+c.winfo_width()
+    y1=y+c.winfo_height()
+    
+    filename = f"{animationfolder}\{frame}.png"
+    ImageGrab.grab().crop((x,y,x1,y1)).save(filename)
+    c.delete("all")
+    exportlines.clear()
+
+    print("done unloading")
+
+    
+def loadframe(frame):
+    global ids, idlist, exportlines
+    print(f"loading {frame}")
+
+    if animationfolder == None:
+        return
+
+    if os.path.isfile(f"{animationfolder}\{frame}.py") == False:
+        return
+
+    fp = open(f"{animationfolder}\{frame}.py", 'r')
+
+    i = 0
+    
+    for x in fp:
+        i += 1
+
+        if i > 6 and x != "tkinter.mainloop()":
+            exec(x)
+            exportlines.append(x)
+            ids += 1
+            idlist.append(ids)
+    
+    print(f"loaded {frame}")
+    fp.close()
+
+    
+
+def changeframe(byhowmuch):
+    global frame, framelabel
+
+    print(f"changeframe {byhowmuch}")
+
+    if animationfolder == None:
+        print("SOMETHING WENT BIG WRONG; ANIMATION FOLDER NOT SPECIFIED")
+        return
+    
+    #if frame + byhowmuch < 0:
+        #return
+    print(frame, byhowmuch)
+
+    unloadframe(frame)
+    frame = frame + byhowmuch
+    loadframe(frame)
+
+    framelabel.configure(text=f"Frame {frame}")
+
+def changeframeminus():
+    changeframe(-1)
+def changeframeplus():
+    changeframe(1)
+
 
 win.bind('<Configure>', movetoolwin)
 
@@ -597,6 +732,7 @@ filemenu.add_command(label="Load", command=load)
 filemenu.add_separator()
 filemenu.add_command(label="Save/Export to .py", command=exportpy)
 filemenu.add_command(label="Export image", command=exportpng)
+filemenu.add_command(label="Export animation as .gif", command=exportgif)
 menu.add_cascade(label="File", menu=filemenu)
 
 editmenu = tkinter.Menu(menu)
@@ -604,6 +740,10 @@ editmenu.add_command(label="Clear Canvas", command=deleteall)
 editmenu.add_separator()
 editmenu.add_command(label="Change Canvas Size", command=canvaswidth)
 menu.add_cascade(label="Edit", menu=editmenu)
+
+animationmenu =tkinter.Menu(menu)
+animationmenu.add_command(label="Select Animation folder", command=initanimation)
+menu.add_cascade(label="Animation", menu=animationmenu)
 
 poslabel = tkinter.Label(toolwindow, text="", font="Roboto 14")
 poslabel.pack()
@@ -652,13 +792,26 @@ snapp = tkinter.Scale(colgrid, from_=0, to=200, orient=HORIZONTAL, length=200, l
 snapp.grid(row=3,column=0,columnspan=3)
 snapp.set(roundto)
 
+toollabel = tkinter.Label(toolwindow, text="Animation", font="Roboto 14").pack()
+
+animationguiframe = tkinter.Frame(toolwindow)
+animationguiframe.pack()
+
+isanimationmodelabel = tkinter.Label(animationguiframe, text="ANIMATION MODE DISABLED\nto work with animation enable via Menu>Animation")
+isanimationmodelabel.grid(row=0,column=0, columnspan=3)
+frameprevbut = tkinter.Button(animationguiframe, text="<", command=changeframeminus).grid(row=1, column=0)
+framelabel = tkinter.Label(animationguiframe, text="Frame 0")
+framelabel.grid(row=1,column=1)
+framenextbut = tkinter.Button(animationguiframe, text=">", command=changeframeplus).grid(row=1, column=2)
+
+
 #selobjframe = tkinter.Frame(toolwindow)
 #selobjframe.pack()
 
 #selobjname = tkinter.Label(selobjframe, text="Select object to edit it")
 #selobjname.pack()
 
-melabel = tkinter.Label(toolwindow, text="Made by TobaT3", font="Roboto 8").pack()
+melabel = tkinter.Label(toolwindow, text="Made by TobaT3", font="Roboto 8").pack(anchor="s")
 
 
 win.mainloop()

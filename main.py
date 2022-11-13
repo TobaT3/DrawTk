@@ -1,7 +1,7 @@
 import glob
 from glob import escape
 import tkinter
-from tkinter import BOTTOM, HORIZONTAL, TOP, colorchooser, filedialog, messagebox, font, PhotoImage, simpledialog
+from tkinter import HORIZONTAL, colorchooser, filedialog, messagebox, font, PhotoImage, StringVar
 import PIL
 from PIL import ImageGrab, Image
 import pathlib
@@ -80,6 +80,7 @@ isfilltransparent = True
 isanimation = False
 animationfolder = None
 frame = 0
+gifms = StringVar()
 
 def callback(e): # mouse movement
     global c,x,y, poslabel, snapp, roundto,xc1,yc1,xc2,yc2,previewid,ids,preview, linethicc, isfilltransparent, fillcolor, linecolor, pwcoordc, mode, idlist, previewid, drawingngon, previewobj, clickcs
@@ -445,28 +446,39 @@ def fontchooser():
 
     font = tkinter.font.Font(root=None, family=font["family"], size=font["size"], weight=font["weight"], slant=font["slant"], underline=font["underline"], overstrike=font["overstrike"])
 
-def createtextwindow():
-    global textwindow, fontbutton, fontstr
+def updategiflengthl(arg1, arg2, arg3): #args are useless but im using the stringvar callback thing so it passes them along
+    global giflengthl
 
-    textwindow = tkinter.Toplevel(toolwindow)
-    textwindow.geometry("300x100")
-    textwindow.title("Text")
-    textwindow.resizable(False, False)
-    textwindow.overrideredirect(True)
+    frames = [Image.open(image) for image in glob.glob(f"{animationfolder}/*.PNG")]
+    frames = len(frames)
+    giflengthl.configure(text=f"Frames: {frames}, Total length: {(int(gifms.get())/1000)*frames}s")
+
+def creategifexportwindow():
+    global gifexwindow, gifms, giflengthl
+
+    gifexwindow = tkinter.Toplevel(toolwindow)
+    gifexwindow.title("Export animation")
+    gifexwindow.resizable(False, False)
+    gifexwindow.overrideredirect(False)
+
+    entryms = tkinter.Entry(gifexwindow, textvariable=gifms, justify="right", )
+    entryms.insert(0, "100")
+    entryms.grid(column=0, row=0)
+
+    tkinter.Label(gifexwindow, text="miliseconds/frame").grid(column=1, row=0)
+
+    frames = [Image.open(image) for image in glob.glob(f"{animationfolder}/*.PNG")]
+    frames = len(frames)
+    giflengthl = tkinter.Label(gifexwindow, text=f"Frames: {frames}, Total length: {(int(gifms.get())/1000)*frames}s")
+    giflengthl.grid(column=0, row=1)
+
+    tkinter.Button(gifexwindow, text="Export", command=exportgif).grid(column=1,row=1)
 
     x = toolwindow.winfo_x()
     y = toolwindow.winfo_y()
-    textwindow.geometry(f'{300}x{60}+{x-300}+{y+235}')
-
-    fontbutton = tkinter.Button(textwindow, text="Change font and size "+str(fontstr), command=fontchooser)
-    fontbutton.pack()
-
-    donebutton = tkinter.Button(textwindow, text="DONE", command=donetext)
-    donebutton.pack()
-
-    textwindow.bind('<KeyPress>', onKeyPress) # so you can type in both windows; annoyed me when you couldnt
+    gifexwindow.geometry(f'{300}x{60}') #+{x-300}+{y+235}
     
-
+    gifms.trace_add("write", updategiflengthl)
 
 
 def opencolorpick():
@@ -549,21 +561,20 @@ def exportpng():
 
 
 def exportgif():
-    global animationfolder
+    global animationfolder, gifms, gifexwindow
 
     if animationfolder == None:
         animationfolder = filedialog.askdirectory(initialdir=pathlib.Path(__file__).parent.resolve(), title="Select folder with images")
     expgifname = filedialog.asksaveasfilename(initialdir = pathlib.Path(__file__).parent.resolve(), title = "", filetypes=[("GIF", ".gif")], defaultextension=".gif")
-    giffiles = []
 
-    msperframe = 100 #will be modifiable global setting but for now setting it here
+    gifms = int(gifms.get())
 
     frames = [Image.open(image) for image in glob.glob(f"{animationfolder}/*.PNG")] #FINALLY A SOLUTION THAT WORKED https://www.blog.pythonlibrary.org/2021/06/23/creating-an-animated-gif-with-python/ i love plagiarism
     frame_one = frames[0]
     frame_one.save(expgifname, format="GIF", append_images=frames,
-               save_all=True, duration=msperframe, loop=0)
-
-        
+               save_all=True, duration=gifms, loop=0)
+    
+    gifexwindow.destroy()
 
 #generate()
 
@@ -719,7 +730,6 @@ def changeframeminus():
 def changeframeplus():
     changeframe(1)
 
-
 win.bind('<Configure>', movetoolwin)
 
 #lbl = tkinter.Label(toolwindow, text="I am in this toolwindow thing right").pack()
@@ -732,7 +742,7 @@ filemenu.add_command(label="Load", command=load)
 filemenu.add_separator()
 filemenu.add_command(label="Save/Export to .py", command=exportpy)
 filemenu.add_command(label="Export image", command=exportpng)
-filemenu.add_command(label="Export animation as .gif", command=exportgif)
+filemenu.add_command(label="Export animation as .gif", command=creategifexportwindow)
 menu.add_cascade(label="File", menu=filemenu)
 
 editmenu = tkinter.Menu(menu)
@@ -812,7 +822,6 @@ framenextbut = tkinter.Button(animationguiframe, text=">", command=changeframepl
 #selobjname.pack()
 
 melabel = tkinter.Label(toolwindow, text="Made by TobaT3", font="Roboto 8").pack(anchor="s")
-
 
 win.mainloop()
 toolwindow.mainloop()

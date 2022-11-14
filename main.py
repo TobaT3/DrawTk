@@ -2,11 +2,11 @@ import glob
 from glob import escape
 import tkinter
 from tkinter import HORIZONTAL, colorchooser, filedialog, messagebox, font, PhotoImage, StringVar
-import PIL
 from PIL import ImageGrab, Image
 import pathlib
 import os, sys
 import tkfontchooser
+from functools import lru_cache
 
 try:
     import pyi_splash
@@ -511,7 +511,7 @@ def togglefilltransparent():
 def load():
     global ids, idlist, exportlines
 
-    fp = filedialog.askopenfile(initialdir = pathlib.Path(__file__).parent.resolve(), title = "Open a DrawTk generated .py file", filetypes=[("Python file", ".py")], defaultextension=".py")
+    fp = open(filedialog.askopenfilename(initialdir = pathlib.Path(__file__).parent.resolve(), title = "Open a DrawTk generated .py file", filetypes=[("Python file", ".py")], defaultextension=".py"), 'w')
 
     i = 0
     
@@ -653,17 +653,45 @@ def unloadframe(frame):
 
     filename = f"{animationfolder}\{frame}.py"
 
-    fp = open(filename, 'w')
-    fp.write('#DrawTk Animation frame\n')
-    fp.write('\nimport tkinter')
-    fp.write(f'\nc = tkinter.Canvas(height={CANVAS_HEIGHT}, width={CANVAS_WIDTH})')
-    fp.write('\nc.pack()\n')
-    
-    for x in exportlines:
-        print(x)
-        fp.write('\n'+x)
+    if os.path.isfile(filename):
+        i = 0
 
-    fp.close()
+        #fp2 = openfilepath(filename, 'r')
+        fp2 = open(filename, 'r')
+        oldexportlines = []
+
+        for x in fp2:
+            i += 1
+
+            if i > 6 and x != "tkinter.mainloop()":
+                oldexportlines.append(x)
+
+        
+        differences = list(set(oldexportlines).symmetric_difference(set(exportlines)))
+
+        if len(differences) == 0:
+            fp2.close()
+            return
+
+        fp = open(filename, 'a')
+        for x in differences:
+            print(x)
+            fp.write('\n'+x)
+
+        fp.close()
+        fp2.close()
+    else:
+        fp = open(filename, 'w')
+        fp.write('#DrawTk Animation frame\n')
+        fp.write('\nimport tkinter')
+        fp.write(f'\nc = tkinter.Canvas(height={CANVAS_HEIGHT}, width={CANVAS_WIDTH})')
+        fp.write('\nc.pack()\n')
+        
+        for x in exportlines:
+            print(x)
+            fp.write('\n'+x)
+
+        fp.close()
 
     x=win.winfo_rootx()+c.winfo_x()
     y=win.winfo_rooty()+c.winfo_y()
@@ -704,8 +732,6 @@ def loadframe(frame):
     print(f"loaded {frame}")
     fp.close()
 
-    
-
 def changeframe(byhowmuch):
     global frame, framelabel
 
@@ -724,6 +750,8 @@ def changeframe(byhowmuch):
     loadframe(frame)
 
     framelabel.configure(text=f"Frame {frame}")
+
+    return
 
 def changeframeminus():
     changeframe(-1)

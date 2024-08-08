@@ -1,8 +1,6 @@
 import glob
-from glob import escape
 import tkinter
 from tkinter import HORIZONTAL, colorchooser, filedialog, messagebox, font, PhotoImage, StringVar
-import PIL
 from PIL import ImageGrab, Image
 import pathlib
 import os, sys
@@ -31,7 +29,7 @@ iline = PhotoImage(file=os.path.abspath(os.path.join(bundle_dir, 'iline.png')))
 ingon = PhotoImage(file=os.path.abspath(os.path.join(bundle_dir, 'ingon.png')))
 itext = PhotoImage(file=os.path.abspath(os.path.join(bundle_dir, 'itext.png')))
 
-win.iconbitmap(path_to_ico) 
+# win.iconbitmap(path_to_ico) #DOESNT WORK ON LINUX
 
 c = tkinter.Canvas(win, height=CANVAS_HEIGHT, width=CANVAS_WIDTH, highlightthickness=0,borderwidth=0)
 c.pack()
@@ -137,6 +135,9 @@ def click(e):
     pwcoordc += 1
     print("Clicked")
     print(exportlines)
+    print(exportobjdict)
+    print(idlist)
+    print(ids)
     
     c.delete(previewid)
     c.delete(textid) #sometimes for some reason the deleting screws up, so this is another override
@@ -154,7 +155,7 @@ def click(e):
         yc2 = round(y/roundto)*roundto
         
         if mode=="triangle":
-            escape
+            glob.escape
         elif mode =="ngon":
             clickc = 1
         else:
@@ -270,6 +271,7 @@ def click(e):
         if len(exportlines) > 1:
             popinexportlines = exportobjdict[delid]
             exportlines.pop(popinexportlines)
+            moveExportObjDict(popinexportlines)
         
         
         c.delete(delid)
@@ -508,6 +510,13 @@ def togglefilltransparent():
         filltransparentbut.configure(bg="#BDBDBD")
         filltransparentbut.config(text="Fill Transparent (T)")
 
+"""When something is popped from export lines, exportobjdict needs to be changed accordingly. Changes every value in the dict after 'afterId' by one. This is horrible code lmao"""
+def moveExportObjDict(afterId: int) -> None:
+    for k in exportobjdict:
+        if exportobjdict[k] > afterId:
+            exportobjdict[k] = exportobjdict[k]-1
+
+
 def load():
     global ids, idlist, exportlines
 
@@ -584,6 +593,8 @@ def undo():
     c.delete(idlist[len(idlist)-1])
     idlist.pop()
     exportlines.pop()
+    #moveExportObjDict(len(exportlines)) shouldnt be needed. leaving it here if neccessary 
+
 
     print(exportlines, type(exportlines))
     print(ids, idlist)
@@ -591,7 +602,7 @@ def undo():
 def deleteall():
     global exportlines
 
-    if messagebox.askokcancel("Are you sure?", "This will delete your canvas forever (a long time)", icon = 'warning') == False:
+    if messagebox.askokcancel("Are you sure?", "This will delete your canvas forever", icon = 'warning') == False:
         print("cancelled deleteall")
     else:
         c.delete("all")
@@ -600,7 +611,7 @@ def deleteall():
 toolwindow = tkinter.Toplevel(win)
 toolwindow.title("Toolbox")
 toolwindow.resizable(False, False)
-toolwindow.iconbitmap(path_to_ico) 
+# toolwindow.iconbitmap(path_to_ico) #DOESNT WORK ON LINUX
 
 def movetoolwin(e):
     x = win.winfo_x()

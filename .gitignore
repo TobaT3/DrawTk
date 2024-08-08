@@ -5,3 +5,5 @@ tkinter_drawing.png
 build/
 dist/
 main.spec
+.venv/
+animationtest/
